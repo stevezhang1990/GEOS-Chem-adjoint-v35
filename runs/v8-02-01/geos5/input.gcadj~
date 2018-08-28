@@ -1,0 +1,185 @@
+GEOS-CHEM ADJOINT SIMULATION v35j
+-------------------------------+-----------------------------------------------
+%%% ADJOINT SIMULATION MENU %%%           
+Do adjoint run    LADJ         : T
+Select one simulation type     :---
+Inverse problem   L4DVAR       : T
+Kalman filter     L3DVAR       : F
+Sensitivity       LSENS        : F
+ => spot finite diff  FD_SPOT  : F
+ => global finite diff FD_GLOB : T
+-------------------------------+-----------------------------------------------
+%%% FORWARD MODEL OPTIONS %%%           
+adjoint chemistry LADJ_CHEM    : T
+aerosol thermo    LAERO_THEM   : T
+ => ISORROPIAII                : F
+-------------------------------+-----------------------------------------------
+%%% ADJOINT MODEL OPTIONS %%%           
+Include a priori term APSRC    : T
+ => offdiagonal                : F
+Compute DFP inverse Hessian    : F
+Compute BFGS inverse Hessian   : F
+Include rxn rate sensitivities : F
+Delete chk files LDEL_CHKPT    : T
+Scale up and FILL adj transport: F
+-------------------------------+-----------------------------------------------
+%%% DIRECTORIES %%%
+Optimization output            : OptData/
+Temporary adjoint dir adjtmp   : adjtmp/
+Diagnostics ouptut             : diagadj/
+-------------------------------------------------------------------------------
+%%% CONTROL VARIABLE MENU %%%
+Initial conditions LICS        : T
+... OR emissions   LADJ_EMS    : F
+ => strat prod/loss LADJ_STRAT : F
+ => reaction rates LADJ_RRATE  : F
+>------------------------------<
+          FOR LICS             :  
+NSOPT: number of tracers opt   : 1
+  => opt these tracers------>  : TRC# trc_name SF_DEFAULT REG_PARAM ERROR
+Tracer #1                      : 2    Ox       1          1         0.5
+>------------------------------<
+          FOR LADJ_EMS         :
+NNEMS: ems groups implemented  : 33
+Emission entries ------------> : EMS# ems_name       opt  SF_DEFAULT REG_PARAM ERROR CORR_LX CORR_LY
+Emission #1                    : 1    IDADJ_ENH3_an  F    1          1         1       100     100
+Emission #2                    : 2    IDADJ_ENH3_na  F    1          1         1       100     100
+Emission #3                    : 3    IDADJ_ENH3_bb  F    1          1         1       100     100
+Emission #4                    : 4    IDADJ_ENH3_bf  F    1          1         1       100     100
+Emission #5                    : 5    IDADJ_ESO2_an1 F    1          1         1       100     100
+Emission #6                    : 6    IDADJ_ESO2_an2 F    1          1         1       100     100
+Emission #7                    : 7    IDADJ_ESO2_bf  F    1          1         1       100     100
+Emission #8                    : 8    IDADJ_ESO2_bb  F    1          1         1       100     100
+Emission #9                    : 9    IDADJ_ESO2_sh  F    1          1         1       100     100
+Emission #10                   : 10   IDADJ_EBCPI_an F    1          1         1       100     100
+Emission #11                   : 11   IDADJ_EBCPO_an F    1          1         1       100     100
+Emission #12                   : 12   IDADJ_EOCPI_an F    1          1         1       100     100
+Emission #13                   : 13   IDADJ_EOCPO_an F    1          1         1       100     100
+Emission #14                   : 14   IDADJ_EBCPI_bf F    1          1         1       100     100
+Emission #15                   : 15   IDADJ_EBCPO_bf F    1          1         1       100     100
+Emission #16                   : 16   IDADJ_EOCPI_bf F    1          1         1       100     100
+Emission #17                   : 17   IDADJ_EOCPO_bf F    1          1         1       100     100
+Emission #18                   : 18   IDADJ_EBCPI_bb F    1          1         1       100     100
+Emission #19                   : 19   IDADJ_EBCPO_bb F    1          1         1       100     100
+Emission #20                   : 20   IDADJ_EOCPI_bb F    1          1         1       100     100
+Emission #21                   : 21   IDADJ_EOCPO_bb F    1          1         1       100     100
+Emission #22                   : 22   IDADJ_ENOX_so  F    1          1         1       100     100
+Emission #23                   : 23   IDADJ_ENOX_li  F    1          1         1       100     100
+Emission #24                   : 24   IDADJ_ENOX_ac  F    1          1         1       100     100
+Emission #25                   : 25   IDADJ_ENOX_an  T    1          1         0.5       100     100
+Emission #26                   : 26   IDADJ_ENOX_bf  T    1          1         0.5       100     100
+Emission #27                   : 27   IDADJ_ENOX_bb  T    1          1         0.5       100     100
+Emission #28                   : 28   IDADJ_ECO_an   T    1          1         0.5       100     100
+Emission #29                   : 29   IDADJ_ECO_bf   T    1          1         0.5       100     100
+Emission #30                   : 30   IDADJ_ECO_bb   T    1          1         0.5       100     100
+Emission #31                   : 31   IDADJ_EISOP_an F    1          1         1       100     100
+Emission #32                   : 32   IDADJ_EISOP_bf F    1          1         1       100     100
+Emission #33                   : 33   IDADJ_EISOP_bb F    1          1         1       100     100
+Number emis time group MMSCL   : 1
+>------------------------------<
+        FOR LADJ_STRAT         :
+NSTPL: strat prod & loss trcs  : 0
+Read reactions from STR_ID file: T
+Strat prod & loss trc entries  : ID# trc_name    opt   SF_DEFALUT  REG_PARAM ERROR
+>------------------------------<
+         FOR LADJ_RRATE        :
+NRRATES: num of rxn rates      : 0
+Read reactions from RXN_ID file: T
+ ...or use these Rxn rates     : ID#   rxn_name  opt SF_DEFAULT REG_PARAM ERROR
+-------------------------------------------------------------------------------
+%%% WEAK CONSTRAINT MENU %%%
+Do WC4DVAR  DO_WEAK_CONSTRAINT : T
+Compute forcing for tracer #   : 2
+Min Longitude MIN_LON_U        : -180
+Max Longitude MAX_LON_U        : 180
+Min Latitude MIN_LAT_U         : -60
+Max Latitude MAX_LAT_U         : 60
+Min Level MIN_LEV_U            : 1
+Max Level MAX_LEV_U            : 30
+Timesteps LEN_SUBWINDOW_U      : 12
+-------------------------------------------------------------------------------
+%%% OBSERVATION MENU %%%
+%%%  for PSUEDO_OBS  %%%
+%%%   or LSENSE      %%%
+Observation frequency OBS_FREQ : 60
+Limit number of observations?  : F
+  =>  Forcing time till        : 20050701 050000
+COST FUNCTION options for LSENS:---
+  =>  tracer kg/box            : T
+  =>  tracer ug/m3             : F
+  =>  tracer ppb               : F
+  =>  tracer ppm free trop     : F
+  =>  species ppb w/averaging  : F
+  =>  tracer ug/m3 pop weight  : F
+  =>  tracer ug/m2/hr          : F
+  =>  deposition based?        : F
+      =>  dry dep (not kpp)    : F
+      =>  dry dep (kpp)        : F
+      =>  tracer wet LS dep    : F
+      =>  tracer wet CV dep    : F
+      =>  molec/cm2/s          : F
+      =>  kgN/ha/yr            : F
+      =>  eq/ha/yr             : F
+      =>  kg/s                 : F
+  =>  Regional mask?           : F
+      =>  binary punch file?   : F
+         =>  bpch mask name    : usa_mask.geos.4x5
+      OR  netcdf file      ?   : F
+         =>  nc mask file name : /home/hyungmin/Class_1/Class1.nc
+         =>  nc mask var  name : NPS_16
+>------------------------------<
+NOBS: number of tracers to obs : 1
+  => obs these tracers------>  : TRC# tracer_name
+Tracer #1                      : 2    Ox
+>------------------------------<
+NOBS_CSPEC: # of species to obs: 0
+  => obs these species------>  : species_name
+-------------------------------------------------------------------------------
+%%% FINITE DIFFERENCE MENU %%%
+fd perturbation        FD_DIFF : 0.1
+Numerator of derivative to test:---
+ => longitude degree   LONFD   : 32
+ => latitude  degree   LATFD   : 21
+ => OR pick box by grid index? : T
+   => longidute index  IFD     : 41
+   => latitude index   JFD     : 32
+ => altidude index     LFD     : 1
+ => tracer (STT #)     NFD     : 2
+Denomenator of deriv.   to test:
+ => w/LEMS: emis group MFD     : 1
+ => w/LEMS: sector     EMSFD   : 1
+ => w/LICS: tracer     ICSFD   : 1
+ => w/LSTR: tracer     STRFD   : 1
+ => w/LRRATE: rate     RATFD   : 1
+-------------------------------------------------------------------------------
+%%% DIAGNOSTICS MENU %%%
+General                        : T
+ => print debug  LPRINTFD      : F
+ => jsave, jsave2              : F
+ => adjoint traj LADJ_TRAJ     : F
+   => w.r.t. scale factors?    : T
+ => save iteration diags LITR  : T
+ => sense w.r.t absolute emis  : F
+CO satellite diganostics       : F
+ => H(model)                   : F
+ => h(obs)                     : F
+ => H(model)-h(obs)            : F
+ => adjoint forcing            : F
+ => model bias                 : F
+ => observation count          : F
+ => DOFs                       : F
+TES NH3 diagnostics            :---
+ => BLVMR                      : F
+HDF diagnostics                :---
+ => Level 2                    : F
+ => Level 3                    : F
+-------------------------------------------------------------------------------
+%%% CRITICAL LOAD MENU %%%
+Critical Load obs              : F
+ => N deposition               : T
+ => Acidity deposition         : F
+Critical Load file             : Exceedence.nc      
+GEOS-Chem file                 : Annual_Deposition.nc
+-------------------------------------------------------------------------------
+END OF FILE                    :
+-------------------------------+-----------------------------------------------

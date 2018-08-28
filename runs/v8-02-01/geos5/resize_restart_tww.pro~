@@ -1,0 +1,115 @@
+pro resize_restart_tww
+;-------------------------------------------------------------------------
+;Resize 4x5 restart file or scaling factor to nested domain
+;Created by Zhe Jiang (Nov 2011)
+;Modified by Thomas Walker (Nov 2012)
+;-------------------------------------------------------------------------
+
+;====================================================================
+;File names for input and output
+;====================================================================
+InFile = 'restart.geos5.2008070100'
+OutFile = 'restart.geos5.05x06.NA.2008070100'
+NL = 47
+
+;InFile = 'gctm.sf.02'
+;OutFile = 'gctm.sf.02_05x06'
+;NL = 1
+
+;====================================================================
+;latitude-longtitude setting of nested domain
+;====================================================================
+LL = [ 10, -140 ] ;North America
+UR = [ 70,  -40 ]
+
+;LL = [ 13, -126 ] ;US domain
+;UR = [ 57,  -66 ]
+
+;LL = [ 20, -110 ] ;ENA domain
+;UR = [ 51,  -64 ]
+;====================================================================
+;Grid information of input file
+;====================================================================
+;Read all data blocks from file
+CTM_Get_Data, DataInfo, FileName=InFile
+
+;MODELINFO and GRIDINFO corresponding to each data block
+GetModelAndGridInfo, DataInfo[0], InType, InGrid
+
+LonInx = InGrid.XEDGE
+LatIny = InGrid.YEDGE
+NInx = N_Elements( LonInx )
+NIny = N_Elements( LatIny )
+
+;====================================================================
+;Grid information of Output file
+;====================================================================
+OutType = CTM_TYPE('GEOS5')
+OutType.resolution(0) = 2.0/3.0
+OutType.resolution(1) = 0.5
+OutGrid  = CTM_Grid( OutType )
+
+LonOutx = OutGrid.XMid
+LatOuty = OutGrid.YMid
+
+;Get (I,J) index of LL and UR corners
+CTM_Index, OutType, I0, J0, Center=LL, /Non_Interactive
+CTM_Index, OutType, I1, J1, Center=UR, /Non_Interactive
+
+NOutx = I1 - I0 + 1
+NOuty = J1 - J0 + 1
+;====================================================================
+; Read data and trim it to the new grid
+;====================================================================
+; Loop over all data blocks
+FirstTime = 1L
+for D = 0L, N_Elements( DataInfo ) - 1L do begin
+   
+   OutData = dblarr(NOutx,NOuty,NL)
+   InData = *(DataInfo[D].data)
+   
+   for J=J0-1, J1-1 do begin
+      for K = 0, NIny-2 do begin
+         if (LatOuty(J) ge LatIny (K) and LatOuty(J) lt LatIny (K+1)) then Jy = K
+         if (LatOuty(J) ge LatIny (NIny-1)) then Jy = NIny-1
+      endfor
+      for I=I0-1, I1-1 do begin
+         for K = 0, NInx-2 do begin
+            if (LonOutx(I) ge LonInx (K) and LonOutx(I) lt LonInx (K+1)) then Ix = K
+            if (LonOutx(I) ge LonInx (NInx-1)) then Ix = NInx-1
+         endfor
+         OutData[I-I0+1, J-J0+1, *] = InData[Ix,Jy,*]
+      endfor
+   endfor
+         
+   OutDim = [ NOutx, NOuty, NL]
+   OutFirst = [ I0, J0, 1]
+      
+  ;Make a new DATAINFO structure for trimmed data block
+  Success = CTM_Make_DataInfo( Float( OutData ),           $
+                               ThisDataInfo,               $
+                               ModelInfo=OutType,          $
+                               GridInfo=OutGrid,           $
+                               DiagN=DataInfo[D].Category, $ 
+                               Tracer=DataInfo[D].Tracer,  $
+                               Tau0=DataInfo[D].Tau0,      $
+                               Tau1=DataInfo[D].Tau1,      $ 
+                               Unit=DataInfo[D].Unit,      $
+                               Dim=OutDim,                 $
+                               First=OutFirst )
+ 
+      if ( FirstTime )                                         $
+         then NewDataInfo = [ ThisDataInfo ]                   $
+         else NewDataInfo = [ NewDataInfo, ThisDataInfo ]
+      FirstTime = 0L
+
+      UnDefine, InData
+      UnDefine, OutData
+      UnDefine, ThisDataInfo
+
+endfor
+ 
+CTM_WriteBpch, NewDataInfo, FileName=OutFile
+ctm_cleanup
+end
+          

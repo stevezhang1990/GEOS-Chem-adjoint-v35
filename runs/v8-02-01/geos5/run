@@ -1,0 +1,338 @@
+#!/bin/bash
+####
+# Can insert bsub commands here:
+##BSUB -n 08 -W 02:00
+##BSUB -o outfile -e errfile   # my default stdout, stderr files
+####
+#
+# This script runs succesive iterations of optimizing the cost function using 
+# gradients that are either computed or read from *.gdt.* files. dkh, 02/05
+#
+# Notes:
+#  - added comments (dkh, 04/11/05) 
+#  - make directory names shell variables (dkh, 10/06/06)  
+#  - Now make a tar file of aero.ave* and satave.bpch files at each iteration
+#  - Add bsub commands for batch jobs on orion
+#  - This script only seems to work from a tcsh.  
+#  - Improved diagnostics and output, added more comments. (dkh, 11/21/07) 
+#  - make default setup for running on prospero. (dkh, 11/18/10) 
+#    - comment out backup
+#    - use echo instead of ex
+#    - change number of threads
+#    - append ctm.bpch and log with iteration number
+#############################################################################
+
+##################################################################
+# Set run parameters. 
+# - X
+# - XSTOP
+# - RNAME 
+#
+# These need to be set and checked  before every run. 
+# X = 0 creates observations.  X_STOP < X only 
+# creates a backup of the program directory. 
+##################################################################
+# Set the start (or current ) iteration number
+X=1
+
+# Set the stopping iteration number
+XSTOP=15
+
+# Give every run a unique name (default is $PBS_JOBID)
+RNAME=gcadj_std_I_WC
+
+# Specify Type of Run "DEFAULT, HDF, SAT_NETCDF, LIDORT"
+TYPE=HDF_NETCDF
+
+# Set Compiler Options. For a list of all compiler options
+# type 'make help' on the code directory.
+# example IFORT_OPT="DEBUG=yes TRACEBACK=yes"
+
+IFORT_OPT=""
+
+# Recompile geos on every iteration. 
+# NOTE: If you have IPO set to yes we recommend not to recompile.
+# IPO optimization make linking process slow.
+
+RECOMPILE=NO
+
+# Save packages to temporary storage before and after execution
+# Note: Need to set DSAVE below
+SAVE=NO
+
+# Archive packages to permanent storage after execution
+# Note: Need to set DARCHIVE below
+ARCHIVE=NO
+
+# Set compiler, if necessary
+#source /usr/projects/compilers/intel/9.1.043/bin/ifortvars.sh
+
+##################################################################
+# 
+# File structure should be:
+#  DRUN/DPACK/DRUNDIR
+#  DRUN/DPACK/DCODE
+#  
+# Definitions:
+#  - DRUNDIR contains the input files, run script, log files, and 
+#     the optimization files. 
+#  - DCODE contains the source code. 
+#  - DPACK is the complete package of files and folders 
+#  - DRUN is the location where the user would like to place the 
+#     package during execution (usually a local scratch dive). 
+#  - DSAVE is the location where the packages are saved before
+#     and after execution (usually a large NFS mounted storage 
+#     drive). 
+#
+# You MUST set the following according to your filesystem:
+#  - DRUNDIR 
+#  - DSAVE 
+#
+# You MAY change the following:
+#  - DPACK (default is to set equal to RNAME)  
+##################################################################
+# Directory in the package where the executable runs
+DRUNDIR=runs/v8-02-01/geos5_tes_mls_0605
+
+# Directory in the package with the source code 
+DCODE=code
+
+# Package directory name
+DPACK=$RNAME
+
+# Directory where run packages are unpacked and run
+DRUN=/users/jk/16/xzhang/
+
+# Directory where run packages are stored and saved (if not saved locally)
+DSAVE=
+
+# Directory where run packages are backed up (if not saved locally)
+DARCHIVE=
+
+# Get rid of old executables
+if [ -f geos ]; then 
+   rm geos 
+fi
+
+# The optimization code will create this file to indicate completion.  Remove it to start.
+#if [ -f done_with_opt ]; then 
+#   rm done_with_opt
+#fi
+
+# dkh debug unlimit core size and force core dump
+ulimit -c 5000
+decfort_dump_flag=y
+
+#  Set number of threads
+export OMP_NUM_THREADS=24
+
+grep 'Xeon' /proc/cpuinfo
+
+# go to run direction 
+cd $DRUN/$DPACK/$DRUNDIR
+
+##################################################################
+# For every iteration we edit ITER, recompile, execute geos
+#  and save the results.
+##################################################################
+while [ $X -le $XSTOP ]
+do
+        echo "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+        echo "       R U N   F O R   N _ C A L C _ S T O P  =  $X"
+        echo " "
+  
+        # Clean out old files
+        echo ' run: Removing old files'
+        echo '  - checking for old core files'
+        ls core.*
+        if [ $? -eq 0 ]; then 
+           echo '  - removing old core files'
+           rm -v core.*
+        fi 
+        if [ -f ctm.bpch ]; then 
+           rm -v ctm.bpch
+        fi 
+        echo '  - checking for *.chk.* file '
+        ls adjtmp/*.chk.*
+        if [ $? -eq 0 ]; then 
+           echo '  - removing old *.chk.* file '
+           rm -v adjtmp/*.chk.*
+        fi 
+
+        # Save a copy to temporary storage
+        if [ $SAVE = 'YES' ]; then
+        echo ' run: Backing up to temp storage:'
+        echo ' Backup PATH: '$DSAVE
+        cd $DRUN
+        tar -cf $RNAME.tar $DPACK/*
+        cp -v $DRUN/$RNAME.tar $DSAVE/$RNAME.tar
+        fi
+ 
+        echo "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+
+        ##################################################################
+        # Now update the iteration number in ITER
+        ##################################################################
+      
+        cd $DRUN/$DPACK/$DRUNDIR
+        echo "          $X" > ITER
+        echo "          $XSTOP" >> ITER
+        echo "ITER file updated"
+
+        ##################################################################
+        # Compile geos, move it to the run directory and execute
+        ##################################################################
+    
+	cd $DRUN/$DPACK/$DCODE
+        
+        echo "$DRUN/$DPACK/$DRUNDIR" > INPUT_FOLDER 
+        
+        ./objects.sh $TYPE
+	    
+	    rm INPUT_FOLDER
+	    
+        if   [ $TYPE = 'DEFAULT' ]; then
+            IFORT_OPT="$IFORT_OPT "
+        elif [ $TYPE = 'HDF' ]; then
+            IFORT_OPT="$IFORT_OPT HDF=yes" 
+        elif [ $TYPE = 'SAT_NETCDF' ]; then
+            IFORT_OPT="$IFORT_OPT SAT_NETCDF=yes"
+        elif [ $TYPE = 'HDF_NETCDF' ]; then
+            IFORT_OPT="$IFORT_OPT SAT_NETCDF=yes HDF=yes"
+        elif [ $TYPE = 'LIDORT' ]; then
+            IFORT_OPT="$IFORT_OPT LIDORT=yes"
+        fi
+        
+        LBFGS="$(grep 'Compute BFGS inverse Hessian   : F' $DRUN/$DPACK/$DRUNDIR/input.gcadj)"
+        
+        OFFDIAG="$(grep ' => offdiagonal                : F' $DRUN/$DPACK/$DRUNDIR/input.gcadj)"
+        
+        if  [ -z "$OFFDIAG" ] || [ -z "$LBFGS"  ] ; then
+        
+	     IFORT_OPT="$IFORT_OPT USE_MKL=yes" 
+	    
+	    fi  
+	    	       
+        make $IFORT_OPT
+		
+	if [ $RECOMPILE = 'YES' ]; then	
+           mv -f geos ../$DRUNDIR/
+        else
+           cp -f geos ../$DRUNDIR/
+        fi
+        
+        cd ../$DRUNDIR/
+        time ./geos
+        Y=$X
+
+        # make a copy of ctm.bpch for the current iteration
+        cp -v ctm.bpch ctm.bpch.$X
+
+        # Clean out old files
+        echo ' run: Removing excess files'
+        echo '  - checking for old core files'
+        ls core.*
+        if [ $? -eq 0 ]; then
+           echo '  - removing core files'
+           rm -v core.*
+        fi 
+        echo '  - checking for *.chk.* file '
+        ls adjtmp/*.chk.*
+        if [ $? -eq 0 ]; then 
+           echo '  - removing old *.chk.* file '
+           rm -v adjtmp/*.chk.*
+        fi 
+
+        if [ -f done_with_opt ]; then 
+           X=$XSTOP
+        fi 
+ 
+       # A succesful run will generate a gctm.sf.* file. 
+       if [ $X -le 9 ]; then
+          echo ' run: checking if finished iteration ' $X 
+          if [ -f OptData/gctm.sf.0${X} ]; then
+             echo '  - found ' gctm.sf.0$X
+             XGOOD=0
+          else
+             echo '  - did not find ' gctm.sf.0$X 
+             XGOOD=1
+             X=$XSTOP
+          fi 
+       elif [ $X -gt 9 ]; then 
+          echo ' run: checking if finished iteration ' $X 
+          if [ -f OptData/gctm.sf.${X} ]; then
+             echo '  - found ' gctm.sf.$X
+             XGOOD=0
+          else
+             echo '  - did not find ' gctm.sf.$X 
+             XGOOD=1
+             X=$XSTOP
+          fi 
+        fi 
+
+        X=$((X+1))
+done 
+
+##################################################################
+# Finish up. 
+## Save program directories again.
+##################################################################
+echo "sssssssssssssssssssssssssssssssssssssssssssssssssssssss"
+ 
+# check to see if it even compiled
+if [ ! -f geos ]; then
+   XGOOD=3
+fi  
+if   [ "$XGOOD" -eq 0 ]; then 
+      echo " ------------------------------------------------"
+      echo " G E O S   C H E M   A D J O I N T   E X I T E D "
+      echo "            N O R M A L L Y                      "
+      echo " ------------------------------------------------"
+elif [ "$XGOOD" -eq 1 ]; then 
+      echo " ------------------------------------------------"
+      echo "     *  * *   E R R O R   * * *                  "
+      echo " G E O S   C H E M   A D J O I N T   D I D       "
+      echo "     N O T    F I N I S H .                      "
+      echo " ------------------------------------------------"
+elif [ "$XGOOD" -eq 2 ]; then 
+      echo " ------------------------------------------------"
+      echo " G E O S   C H E M   F O R W A R D   M O D E L   " 
+      echo "       ( check log file to see if OK )           "
+      echo " ------------------------------------------------"
+elif [ "$XGOOD" -eq 3 ]; then 
+      echo " ------------------------------------------------"
+      echo "     *  * *   E R R O R   * * *                  "
+      echo "    D I D   N O T   C O M P I L E                " 
+      echo "      ( check source code for errors )           "
+      echo " ------------------------------------------------"
+fi
+
+## Clean out checkpoint files and creat a tarball
+if [[ $SAVE = 'YES' || $ARCHIVE = 'YES' ]]; then
+   echo ' Creating run package tarball '
+   if [ -f adjtmp/*.chk.* ]; then
+       rm adjtmp/*.chk.* 
+   fi
+   cd $DRUN
+   tar -cf $RNAME.tar $DPACK/*
+fi
+
+## Save a copy to temp storage
+if [ $SAVE = 'YES' ]; then
+   echo ' Backing up to temp storage: ' 
+   echo ' Backup PATH: '$DSAVE
+   cp -v $DRUN/$RNAME.tar $DSAVE/$RNAME.tar
+fi
+
+#
+## Save a copy to permanent storage
+if [ $ARCHIVE = 'YES' ]; then
+   echo ' Backing up to permanent storage:'
+   echo ' Backup PATH: '$DARCHIVE
+   cp -v $DRUN/$RNAME.tar $DARCHIVE/runs/$RNAME.tar
+fi
+
+echo "                  N_CALC_STOP at $Y             "
+echo " "
+echo " R U N   S C R I P T    E X I T E D   O N : " $HOSTNAME
+echo "sssssssssssssssssssssssssssssssssssssssssssssssssssssss"

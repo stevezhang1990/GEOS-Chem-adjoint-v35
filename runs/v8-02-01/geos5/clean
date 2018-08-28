@@ -1,0 +1,1 @@
+rm fort.* cost_fun* rms_* model_runs* obs_cost* bg_cost* *~ debug* adjtmp/CHEM* adjtmp/IMIX* adjtmp/FPBL* adjtmp/CONV* adjtmp/RRATE* adjtmp/PRESS* adjtmp/EMISRATE* adjtmp/HSAVE* adjtmp/UPBD* 
