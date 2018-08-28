@@ -1,0 +1,595 @@
+MODULE MLS_HNO3_OBS_MOD
+
+!
+!
+! Module MLS_HNO3_OBS contains all subroutines and variables needed for MLS HNO3 column data
+!
+!
+! Module Routines:
+!
+! (1) READ_MLS_HNO3_FILE       : Read MLS hdf file
+
+  IMPLICIT NONE
+
+#include "CMN_SIZE"
+
+  PRIVATE
+      
+  !PUBLIC READ_OMI_HNO3_FILE
+  PUBLIC READ_MLS_HNO3_FILE
+  PUBLIC CALC_MLS_HNO3_FORCE
+
+  ! Module variables
+
+  ! MLS data
+  REAL*8, ALLOCATABLE :: MLS_LON(:)
+  REAL*8, ALLOCATABLE :: MLS_LAT(:)
+  REAL*8, ALLOCATABLE :: MLS_TIME(:)
+  REAL*8, ALLOCATABLE :: MLS_HNO3(:,:)
+  REAL*8, ALLOCATABLE :: MLS_HNO3_STD(:,:)
+  REAL*8, ALLOCATABLE :: MLS_CN(:)
+  REAL*8, ALLOCATABLE :: MLS_CON_QUAL(:)
+  REAL*8, ALLOCATABLE :: MLS_STA_QUAL(:)
+  REAL*8, ALLOCATABLE :: MLS_MAIN_QUAL(:)
+  REAL*8, ALLOCATABLE :: MLS_VIEW_ZENITH(:)
+  REAL*8, ALLOCATABLE :: MLS_SOLAR_ZENITH(:)
+  REAL*8, ALLOCATABLE :: MLS_PRESSURE(:)
+  
+  ! MLS grid specification
+  INTEGER :: N_MLS_OBS
+  INTEGER :: N_MLS_ALT
+  
+CONTAINS
+
+!-----------------------------------------------------------------------------!
+  SUBROUTINE READ_MLS_HNO3_FILE ( YYYYMMDD, HHMMSS )
+      
+    USE ERROR_MOD, ONLY : ALLOC_ERR
+    USE TIME_MOD,  ONLY : EXPAND_DATE, GET_MONTH, GET_YEAR
+    USE HDF5
+
+    ! Arguments
+    INTEGER, INTENT(IN) :: YYYYMMDD, HHMMSS
+
+    CHARACTER(LEN=255) :: DIR_MLS
+    CHARACTER(LEN=255) :: DIR_MONTH_MLS
+    CHARACTER(LEN=255) :: FILENAME_MLS
+    CHARACTER(LEN=255) :: FILENAME_FULL
+    CHARACTER(LEN=255) :: DSET_NAME
+
+    INTEGER(HID_T) :: file_id, dset_id, dspace_id
+    INTEGER(HSIZE_T) :: dims(2), maxdims(2), data_dims(2)
+    INTEGER :: error
+
+    CALL CLEANUP_MLS
+    
+    DIR_MLS = '/users/jk/15/xzhang/MLS_HNO3/'
+    DIR_MONTH_MLS = '/YYYY/MM/'
+    FILENAME_MLS = 'MLS-Aura_L2GP-HNO3_v04-22-c01_YYYYdMMDD.he5'
+      
+    CALL EXPAND_DATE(DIR_MLS, YYYYMMDD, 0)
+    CALL EXPAND_DATE(DIR_MONTH_MLS, YYYYMMDD, 0)
+    CALL EXPAND_DATE(FILENAME_MLS, YYYYMMDD, 0)
+
+    FILENAME_FULL = TRIM(DIR_MLS) // TRIM(DIR_MONTH_MLS) // TRIM(FILENAME_MLS)
+      
+    PRINT *,"READING MLS File: ", FILENAME_FULL
+
+    ! Initialize HDF5 Interface
+
+    PRINT *,"INITIALIZE INTERFACE"
+
+    CALL h5open_f(error)
+
+    ! Open HDF5 file
+
+    PRINT *,"OPEN FILE"
+
+    CALL h5fopen_f (FILENAME_FULL, H5F_ACC_RDONLY_F, file_id, error)
+      
+    ! Read Time array
+
+    PRINT *,"READING TIME ARRAY"
+
+    DSET_NAME = '/HDFEOS/SWATHS/HNO3/Data Fields/L2gpValue'
+
+    PRINT *,"OPENING DATA SET"
+      
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    ! open dataspace
+
+    CALL h5dget_space_f(dset_id, dspace_id, error)
+
+    ! read in length of data arrays
+
+    CALL h5sget_simple_extent_dims_f(dspace_id, dims, maxdims, error)
+
+    ! close dataspace
+
+    CALL h5sclose_f(dspace_id, error)
+
+    N_MLS_ALT = dims(1)
+    N_MLS_OBS = dims(2)
+
+    ALLOCATE(MLS_TIME(N_MLS_OBS))
+    ALLOCATE(MLS_LON(N_MLS_OBS))
+    ALLOCATE(MLS_LAT(N_MLS_OBS))
+    ALLOCATE(MLS_HNO3(N_MLS_ALT,N_MLS_OBS))
+    ALLOCATE(MLS_CON_QUAL(N_MLS_OBS))
+    ALLOCATE(MLS_HNO3_STD(N_MLS_ALT,N_MLS_OBS))
+    ALLOCATE(MLS_MAIN_QUAL(N_MLS_OBS))
+    ALLOCATE(MLS_STA_QUAL(N_MLS_OBS))
+    ALLOCATE(MLS_CN(N_MLS_OBS))
+    ALLOCATE(MLS_VIEW_ZENITH(N_MLS_OBS))
+    ALLOCATE(MLS_SOLAR_ZENITH(N_MLS_OBS))
+    ALLOCATE(MLS_PRESSURE(N_MLS_ALT))
+
+    PRINT *,"ALLOCATING TIME ARRAY WITH LENGTH: ", N_MLS_OBS
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_HNO3, data_dims, error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! Read MLS HNO3 array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Data Fields/L2gpValue'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_HNO3, data_dims, error)
+
+    CALL h5dclose_f(dset_id,error)
+    !PRINT *, "L2gpValue", MLS_HNO3(:,N_MLS_OBS)
+
+    ! Read Time array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Geolocation Fields/Time'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_TIME, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! Read Longitude array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Geolocation Fields/Longitude'
+      
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_LON, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! Read Latitude array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Geolocation Fields/Latitude'
+      
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_LAT, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! Read MLS HNO3 Precision array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Data Fields/L2gpPrecision'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_HNO3_STD, data_dims, error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! Read Quality array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Data Fields/Quality'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_MAIN_QUAL, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+    ! Read Status array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Data Fields/Status'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_STA_QUAL, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+    ! Read ChunkNumber array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Geolocation Fields/ChunkNumber'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_CN, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+    ! Read LineofSightAngle array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Geolocation Fields/LineOfSightAngle'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_VIEW_ZENITH, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+    ! Read Solar zenith Angle array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Geolocation Fields/SolarZenithAngle'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_SOLAR_ZENITH, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! Read Convergence quality array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Data Fields/Convergence'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_CON_QUAL, (/data_dims(2),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! Read Convergence quality array
+
+    DSET_NAME= '/HDFEOS/SWATHS/HNO3/Geolocation Fields/Pressure'
+
+    CALL h5dopen_f(file_id, DSET_NAME, dset_id, error)
+
+    CALL h5dread_f(dset_id, H5T_NATIVE_DOUBLE, MLS_PRESSURE, (/data_dims(1),0/), error)
+
+    CALL h5dclose_f(dset_id,error)
+
+    ! close HDF5 file
+
+    CALL h5fclose_f(file_id,error)
+
+    ! close HDF5 interface
+
+    CALL h5close_f(error)
+
+
+  END SUBROUTINE READ_MLS_HNO3_FILE
+!-----------------------------------------------------------------------------!
+  SUBROUTINE CALC_MLS_HNO3_FORCE
+
+!!
+!! Subroutine CALC_OMI_HNO3_FORCE computes the HNO3 adjoint forcing from OMI column data
+!!
+
+    USE ADJ_ARRAYS_MOD,     ONLY : STT_ADJ
+    USE CHECKPT_MOD,        ONLY : CHK_STT
+    USE COMODE_MOD,         ONLY : JLOP
+    USE COMODE_MOD,         ONLY : CSPEC_AFTER_CHEM
+    USE COMODE_MOD,         ONLY : CSPEC_AFTER_CHEM_ADJ
+    USE DAO_MOD,            ONLY : AD
+    USE DAO_MOD,            ONLY : AIRDEN
+    USE DAO_MOD,            ONLY : BXHEIGHT
+    USE GRID_MOD,           ONLY : GET_IJ
+    USE TIME_MOD,           ONLY : GET_HOUR
+    USE TROPOPAUSE_MOD,     ONLY : ITS_IN_THE_TROP
+    USE ADJ_ARRAYS_MOD,     ONLY : ID2C
+    USE TRACERID_MOD,       ONLY : IDHNO3, IDTHNO3
+    USE ADJ_ARRAYS_MOD,     ONLY : COST_FUNC
+    USE TRACER_MOD,         ONLY : XNUMOLAIR
+    USE TRACER_MOD,         ONLY : TCVV
+    USE PRESSURE_MOD,       ONLY : GET_PCENTER, GET_PEDGE
+      
+#include "CMN_SIZE" ! size parameters
+
+    INTEGER :: I,J,K,L
+    INTEGER :: I_MLS, J_MLS, JLOOP
+    INTEGER :: IIJJ(2)
+      
+    ! variables for time unit conversion
+    REAL*8 :: tai93
+    INTEGER :: iy,im,id,ih,imin
+    REAL*8 :: sec
+    INTEGER :: GC_HOUR
+
+    ! variables for observation operator and adjoint thereof
+
+    REAL*8 :: GC_HNO3(LLPAR)
+    REAL*8 :: GC_HNO3_COL
+    REAL*8 :: GC_HNO3_ADJ(IIPAR,JJPAR,LLPAR)
+    REAL*8 :: CM22DU
+    REAL*8 :: DIFF
+    REAL*8 :: OBS_ERROR
+
+    LOGICAL :: MLS_MATCH
+    REAL*8  :: OMI_MLS_DIST
+    REAl*8  :: OMI_MLS_DIST_LON
+    REAl*8  :: OMI_MLS_DIST_LAT
+    REAL*8  :: MLS_HNO3_GC(LLPAR)
+    REAL*8  :: MLS_HNO3_GC_STD(LLPAR)
+    REAL*8  :: NCP(LLPAR)
+    REAL*8  :: COUNT_GRID(IIPAR,JJPAR)
+    REAL*8  :: COST_CONTRIB(LLPAR)
+    ! arrays needed for superobservations
+    LOGICAL :: SUPER_OBS = .TRUE.                       ! do super observations?
+    REAL*8 ::  SOBS_COUNT(IIPAR,JJPAR)                   ! super observation count
+    REAL*8 ::  SOBS_ADJ_FORCE(IIPAR,JJPAR,LLPAR)        ! super observation adjoint forcing
+    REAL*8 ::  GC_ADJ_COUNT(IIPAR,JJPAR,LLPAR)
+    REAL*8 ::  NEW_COST(IIPAR,JJPAR)       ! super observation cost function contribution
+    REAL*8 ::  SOBS_GC(IIPAR,JJPAR)
+    REAL*8 ::  SOBS_OMI(IIPAR,JJPAR)
+    REAL*8 ::  SOBS_BIAS(IIPAR,JJPAR)
+    REAL*8 ::  SOBS_CHISQUARED(IIPAR,JJPAR)
+
+    ! Loop through data to find observations
+
+    CM22DU = 2.69E16 ! conversion factor for DU -> #/cm2
+    
+    GC_HOUR = GET_HOUR()
+
+    ! initialize needed arrays and variables
+
+    COUNT_GRID = 0d0
+    COST_CONTRIB = 0d0
+    GC_HNO3 = 0d0
+    GC_HNO3_ADJ = 0d0
+    GC_HNO3_COL = 0d0
+    MLS_HNO3_GC = 0d0
+    MLS_HNO3_GC_STD = 0d0
+    NCP = 0d0
+    SOBS_COUNT = 0d0
+    SOBS_ADJ_FORCE = 0d0
+    NEW_COST = 0d0
+    GC_ADJ_COUNT = 0d0
+
+    OMI_MLS_DIST = 10000d0
+    
+    DO I_MLS = 1, N_MLS_OBS
+       IF(MLS_TIME(I_MLS)>0) THEN
+          ! There is an observation in the MLS grid box.
+          ! Check if it was made within the current hour.
+          tai93 = MLS_TIME(I_MLS)
+
+          ! Convert TAI93 to UTC
+          CALL TAI2UTC(tai93,iy,im,id,ih,imin,sec)
+
+          IF ( ( GC_HOUR .EQ. ih                        ) .AND. & 
+               ( MLS_MAIN_QUAL(I_MLS) > 0.5             ) .AND. &
+               ( MLS_STA_QUAL(I_MLS) < 250              ) .AND. &
+               ( MLS_CON_QUAL(I_MLS) < 1.4    ) ) THEN
+
+             ! Get model grid coordinate indices that correspond to the observation
+             IIJJ = GET_IJ(REAL(MLS_LON(I_MLS),4),REAL(MLS_LAT(I_MLS),4))
+
+             I = IIJJ(1)
+             J = IIJJ(2)
+
+             ! Get GEOS-CHEM HNO3 values
+
+             GC_HNO3 = 0d0
+             GC_HNO3_COL = 0d0
+             MLS_HNO3_GC = 0d0
+             MLS_HNO3_GC_STD = 0d0
+             NCP = 0d0
+             COST_CONTRIB = 0d0
+             DO L = 1, LLPAR
+
+                JLOOP = JLOP(I,J,L)
+
+                IF( ( GET_PCENTER(I,J,L) < 151 ) .AND. ( GET_PCENTER(I,J,L) > 15 ) ) THEN
+
+
+                   !IF ( JLOOP > 0 ) THEN
+
+                   !GC_HNO3(L) = CSPEC_AFTER_CHEM(JLOOP,ID2C(IDHNO3)) * 1d6 / ( AIRDEN(L,I,J) * XNUMOLAIR )
+
+                   !ELSE
+
+                   !GC_HNO3(L) = CHK_STT(I,J,L,IDTOX) * TCVV(IDTOX) / AD(I,J,L)
+
+                   !ENDIF
+
+                   ! CHK_STT is in units of [kg/box] here. Convert to ppb
+                   GC_HNO3(L) =  CHK_STT(I,J,L,IDTHNO3) * TCVV(IDTHNO3) / AD(I,J,L)
+
+                   DO J_MLS = 1, N_MLS_ALT
+
+                      IF( ( MLS_PRESSURE(J_MLS) >= GET_PEDGE(I,J,L+1)   ) .AND. &
+                          ( MLS_PRESSURE(J_MLS) < GET_PEDGE(I,J,L)      ) .AND. &
+                          ( MLS_PRESSURE(J_MLS) < 151                   ) .AND. &
+                          ( MLS_PRESSURE(J_MLS) > 15                    ) .AND. &
+                          ( MLS_HNO3(J_MLS,I_MLS) > 0 ) ) THEN
+                         
+                         MLS_HNO3_GC(L) = MLS_HNO3_GC(L) + MLS_HNO3(J_MLS,I_MLS)
+
+                         MLS_HNO3_GC_STD(L) = MLS_HNO3_GC_STD(L) + MLS_HNO3_STD(J_MLS,I_MLS)**2
+                         
+                         NCP(L) = NCP(L) + 1
+                      ENDIF
+                   ENDDO
+
+                   IF (NCP(L)>0) THEN
+
+                      MLS_HNO3_GC(L) = MLS_HNO3_GC(L)/NCP(L)
+                      MLS_HNO3_GC_STD(L) = (MLS_HNO3_GC_STD(L)**(0.5))/NCP(L)
+                      OBS_ERROR = MLS_HNO3_GC_STD(L)
+                      DIFF = GC_HNO3(L) - MLS_HNO3_GC(L)
+                      COST_CONTRIB(L) = 0.5 * (DIFF/OBS_ERROR)**2
+                      IF ( ( COST_CONTRIB(L) > 0d0) .AND. &
+                           ( GET_PCENTER(I,J,L) < 151 ) .AND. &
+                           ( GET_PCENTER(I,J,L) > 15 ) ) THEN
+                         
+                         IF (SUPER_OBS) THEN
+                            NEW_COST(I,J) = NEW_COST(I,J) + COST_CONTRIB(L)
+                            SOBS_COUNT(I,J) = SOBS_COUNT(I,J) + 1
+                            SOBS_ADJ_FORCE(I,J,L) = SOBS_ADJ_FORCE(I,J,L) + DIFF/(OBS_ERROR**2) * TCVV(IDTHNO3) / AD(I,J,L)
+                            GC_ADJ_COUNT(I,J,L) = GC_ADJ_COUNT(I,J,L) + 1
+                         ENDIF
+                      ENDIF
+                   ENDIF
+                ENDIF
+
+             ENDDO
+             !PRINT *, "MODELLED HNO3", GC_HNO3
+             !PRINT *, "OBSERVED HNO3", MLS_HNO3_GC
+
+             ! Compute stratospheric HNO3 column value [v/v*cm]
+
+             !GC_HNO3_COL = SUM(GC_HNO3(:) * BXHEIGHT(I,J,:) * 100d0)
+
+             !PRINT *, "GC_HNO3_COL", GC_HNO3_COL
+
+             !PRINT *, "MLS_HNO3_COL", MLS_HNO3_COL(I_MLS)
+
+             !DIFF = GC_HNO3_COL - MLS_HNO3_COL(I_MLS)
+
+             !OBS_ERROR = (MLS_HNO3_COL_STD(I_MLS))**0.5
+
+             !DO L = 1, LLPAR
+                !IF( ( GET_PCENTER(I,J,L) < 151 ) .AND. ( GET_PCENTER(I,J,L) > 15 ) ) THEN
+
+                   !JLOOP = JLOP(I,J,L)
+                   
+                   !IF (SUPER_OBS) THEN
+
+                      !SOBS_ADJ_FORCE(I,J,L) = SOBS_ADJ_FORCE(I,J,L) + DIFF/(OBS_ERROR**2) * BXHEIGHT(I,J,L) * 100d0 &
+                           !* TCVV(IDTHNO3) / (AD(I,J,L) * 1d6)
+                   !ELSE
+                      !STT_ADJ(I,J,L,IDTHNO3) = STT_ADJ(I,J,L,IDTHNO3) + DIFF/(OBS_ERROR**2) * BXHEIGHT(I,J,L) * 100d0 &
+                           !* TCVV(IDTHNO3) / (AD(I,J,L) * 1d6)
+
+                   !ENDIF
+                !ENDIF
+             !ENDDO
+             !PRINT *, "SUPER_OBS_FORCE", SOBS_ADJ_FORCE
+          ENDIF
+       
+       ENDIF
+    ENDDO
+    !PRINT *, "SUPER_OBS_FORCE", SOBS_ADJ_FORCE
+
+    IF (SUPER_OBS) THEN
+
+       DO J = 1,JJPAR
+          DO I = 1, IIPAR
+
+             IF(SOBS_COUNT(I,J) > 0d0) THEN
+
+                DO L = 1,LLPAR
+                   IF( ( GET_PCENTER(I,J,L) < 151 ) .AND. & 
+                       ( GET_PCENTER(I,J,L) > 15 ) .AND. &
+                       ( GC_ADJ_COUNT(I,J,L) > 0 ) ) THEN
+
+                      !JLOOP = JLOP(I,J,L)
+
+                      STT_ADJ(I,J,L,IDTHNO3) = STT_ADJ(I,J,L,IDTHNO3) + SOBS_ADJ_FORCE(I,J,L)/GC_ADJ_COUNT(I,J,L)
+
+                   ENDIF
+                ENDDO
+
+                COST_FUNC = COST_FUNC + NEW_COST(I,J)/SOBS_COUNT(I,J)
+             ENDIF
+          ENDDO
+       ENDDO
+    ENDIF
+
+    PRINT *, "COST FUNCTION OF MLS HNO3", COST_FUNC
+
+  END SUBROUTINE CALC_MLS_HNO3_FORCE
+
+!----------------------------------------------------------------------------!
+  SUBROUTINE CLEANUP_MLS
+
+    IF (ALLOCATED( MLS_LON ))  DEALLOCATE( MLS_LON )      
+    IF (ALLOCATED( MLS_LAT ))  DEALLOCATE( MLS_LAT )
+    IF (ALLOCATED( MLS_TIME ))  DEALLOCATE( MLS_TIME )
+    IF (ALLOCATED( MLS_HNO3 ))  DEALLOCATE( MLS_HNO3 )
+    IF (ALLOCATED( MLS_HNO3_STD ))  DEALLOCATE( MLS_HNO3_STD )
+    IF (ALLOCATED( MLS_CON_QUAL ))  DEALLOCATE( MLS_CON_QUAL )
+    IF (ALLOCATED( MLS_MAIN_QUAL ))  DEALLOCATE( MLS_MAIN_QUAL )
+    IF (ALLOCATED( MLS_STA_QUAL ))  DEALLOCATE( MLS_STA_QUAL )
+    IF (ALLOCATED( MLS_CN ))  DEALLOCATE( MLS_CN )
+    IF (ALLOCATED( MLS_SOLAR_ZENITH ))  DEALLOCATE( MLS_SOLAR_ZENITH )
+    IF (ALLOCATED( MLS_VIEW_ZENITH ))  DEALLOCATE( MLS_VIEW_ZENITH )
+    IF (ALLOCATED( MLS_PRESSURE ))   DEALLOCATE( MLS_PRESSURE )
+
+  END SUBROUTINE CLEANUP_MLS
+  
+!-----------------------------------------------------------------------------!
+  
+  SUBROUTINE TAI2UTC(tai93,iy,im,id,ih,imin,sec)
+    
+    !!
+    !! SUBROUTINE TAI2UTC converts TAI93 time (seconds since 1.1.1993) to UTC 
+    !!
+    !! adapted from 
+    !! code.google.com/p/miyoshi/source/browse/trunk/common/common.f90
+    
+    IMPLICIT NONE
+    
+    INTEGER,PARAMETER :: n=7  ! number of leap seconds after Jan. 1, 1993
+    INTEGER,PARAMETER :: leapsec(n) = (/ 15638399, 47174400, 94608001, 141868802, 189302403, 410227204, 504921605/)
+    REAL*8,INTENT(IN) :: tai93
+    INTEGER,INTENT(OUT) :: iy,im,id,ih,imin
+    REAL*8,INTENT(OUT) :: sec
+    REAL*8,PARAMETER :: mins = 60.0d0
+    REAL*8,PARAMETER :: hour = 60.0d0*mins
+    REAL*8,PARAMETER :: day = 24.0d0*hour
+    REAL*8,PARAMETER :: year = 365.0d0*day
+    INTEGER,PARAMETER :: mdays(12) = (/31,28,31,30,31,30,31,31,30,31,30,31/)
+    REAL*8 :: wk,tai
+    INTEGER :: days,i,leap
+    
+    tai = tai93
+    sec = 0.0d0
+    
+    DO i=1,n
+       
+       IF(FLOOR(tai93) == leapsec(i)+1) THEN
+          sec = 60.0d0 + tai93-FLOOR(tai93)
+       ENDIF
+       
+       IF(FLOOR(tai93) > leapsec(i)) tai = tai -1.0d0
+       
+    END DO
+    
+    iy = 1993 + FLOOR(tai /year)
+    wk = tai - REAL(iy-1993)*year - FLOOR(REAL(iy-1993)/4.0)*day
+    
+    IF(wk < 0.0d0) THEN
+       iy = iy -1
+       wk = tai - REAL(iy-1993)*year - FLOOR(REAL(iy-1993)/4.0)*day
+    END IF
+    
+    days = FLOOR(wk/day)
+    wk = wk - REAL(days)*day
+    im = 1
+    
+    DO i=1,12
+       
+       leap = 0
+       IF(im == 2 .AND. MOD(iy,4)==0) leap=1
+       IF(im == i .AND. days >= mdays(i)+leap) THEN
+          im = im + 1
+          days = days - mdays(i)-leap
+       END IF
+       
+    END DO
+    
+    id = days +1
+    
+    ih = FLOOR(wk/hour)
+    wk = wk - REAL(ih)*hour
+    imin = FLOOR(wk/mins)
+    
+    IF(sec < 60.0d0) sec = wk - REAL(imin)*mins
+    
+    RETURN
+    
+  END SUBROUTINE TAI2UTC
+  
+END MODULE MLS_HNO3_OBS_MOD
+
