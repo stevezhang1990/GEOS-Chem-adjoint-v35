@@ -1,0 +1,235 @@
+MODULE ATOM_OBS_MOD
+      
+  IMPLICIT NONE
+
+  INTEGER :: N_ATOM
+  INTEGER :: FILLER
+  REAL*8, ALLOCATABLE :: YEAR_ATOM(:), DAY_ATOM(:), TIME_ATOM(:)
+  REAL*8, ALLOCATABLE :: LON_ATOM(:), LAT_ATOM(:), ALT_ATOM(:)
+  REAL*8, ALLOCATABLE :: O3_UCATS(:), O3_NOy(:), OH_ATOM(:)
+  REAL*8, ALLOCATABLE :: MONTH_ATOM(:), CO_GEOS(:), CO_UCATS(:)
+  REAL*8, ALLOCATABLE :: CH2O_ATOM(:), OH_GC(:), O3_GC(:)
+  REAL*8, ALLOCATABLE :: CO_GC(:), CH2O_GC(:)
+  REAL*8, ALLOCATABLE :: NO2_ATOM(:), NO2_GC(:)
+      
+
+CONTAINS
+!============================================================================      
+  SUBROUTINE CLEANUP_ATOM
+    
+    !! Clean up ATOM arrays
+      
+    IF (ALLOCATED(YEAR_ATOM)) DEALLOCATE(YEAR_ATOM)
+    IF (ALLOCATED(MONTH_ATOM)) DEALLOCATE(MONTH_ATOM)
+    IF (ALLOCATED(DAY_ATOM)) DEALLOCATE(DAY_ATOM)
+    IF (ALLOCATED(TIME_ATOM)) DEALLOCATE(TIME_ATOM)
+    IF (ALLOCATED(LON_ATOM)) DEALLOCATE(LON_ATOM)
+    IF (ALLOCATED(LAT_ATOM)) DEALLOCATE(LAT_ATOM)
+    IF (ALLOCATED(ALT_ATOM)) DEALLOCATE(ALT_ATOM)
+    IF (ALLOCATED(OH_ATOM)) DEALLOCATE(OH_ATOM)
+    IF (ALLOCATED(O3_UCATS)) DEALLOCATE(O3_UCATS)
+    IF (ALLOCATED(O3_NOy)) DEALLOCATE(O3_NOy)
+    IF (ALLOCATED(CO_GEOS)) DEALLOCATE(CO_GEOS)
+    IF (ALLOCATED(CO_UCATS)) DEALLOCATE(CO_UCATS)
+    IF (ALLOCATED(CH2O_ATOM)) DEALLOCATE(CH2O_ATOM)
+    IF (ALLOCATED(NO2_ATOM)) DEALLOCATE(NO2_ATOM)
+    IF (ALLOCATED(OH_GC)) DEALLOCATE(OH_GC)
+    IF (ALLOCATED(O3_GC)) DEALLOCATE(O3_GC)
+    IF (ALLOCATED(CO_GC)) DEALLOCATE(CO_GC)
+    IF (ALLOCATED(CH2O_GC)) DEALLOCATE(CH2O_GC)
+    IF (ALLOCATED(NO2_GC)) DEALLOCATE(NO2_GC)
+    
+  END SUBROUTINE CLEANUP_ATOM
+!============================================================================
+  SUBROUTINE INIT_ATOM
+    
+    !! Initialize ATOM arrays
+    
+    !ATOM from 2016-08-01 to 2016-08-12 is ATOM1-1  
+    N_ATOM = 7794
+    !ATOM from 2016-08-15 to 2016-08-31 is ATOM1-2
+    !N_ATOM = 6957
+    FILLER = -999
+    ALLOCATE(YEAR_ATOM(N_ATOM))
+    ALLOCATE(MONTH_ATOM(N_ATOM))
+    ALLOCATE(DAY_ATOM(N_ATOM))
+    ALLOCATE(TIME_ATOM(N_ATOM))
+    ALLOCATE(LON_ATOM(N_ATOM))
+    ALLOCATE(LAT_ATOM(N_ATOM))
+    ALLOCATE(ALT_ATOM(N_ATOM))
+    ALLOCATE(O3_NOy(N_ATOM))
+    ALLOCATE(O3_UCATS(N_ATOM))
+    ALLOCATE(CO_GEOS(N_ATOM))
+    ALLOCATE(CO_UCATS(N_ATOM))
+    ALLOCATE(CH2O_ATOM(N_ATOM))
+    ALLOCATE(NO2_ATOM(N_ATOM))
+    ALLOCATE(OH_ATOM(N_ATOM))
+    ALLOCATE(OH_GC(N_ATOM))
+    ALLOCATE(O3_GC(N_ATOM))
+    ALLOCATE(CO_GC(N_ATOM))
+    ALLOCATE(CH2O_GC(N_ATOM))
+    ALLOCATE(NO2_GC(N_ATOM))
+
+    !     Initialize GC-O3 values to missing value
+    O3_GC = FILLER
+    OH_GC = FILLER
+    CO_GC = FILLER
+    CH2O_GC = FILLER
+    NO2_GC = FILLER
+    
+  END SUBROUTINE INIT_ATOM
+!=============================================================================
+  SUBROUTINE READ_ATOM_DATA
+    
+    !! Read ATOM data from disk
+    
+    INTEGER :: I
+    
+    OPEN(UNIT=26,FILE="/users/jk/15/xzhang/ATom/atom1_1.csv")
+    
+    DO I=1,N_ATOM
+       
+       READ(26, *) YEAR_ATOM(I), MONTH_ATOM(I), DAY_ATOM(I), &               
+            TIME_ATOM(I), LON_ATOM(I), LAT_ATOM(I), ALT_ATOM(I), OH_ATOM(I), &
+            O3_NOy(I), O3_UCATS(I), CO_GEOS(I), CO_UCATS(I), CH2O_ATOM(I),&
+            NO2_ATOM(I)
+       
+    ENDDO
+    
+    CLOSE(UNIT=26)
+    
+  END SUBROUTINE READ_ATOM_DATA
+!==============================================================================
+  SUBROUTINE WRITE_ATOM_DATA
+    
+    !! Write ATOM data to disk
+    
+    INTEGER :: I
+    
+    OPEN(UNIT=27,FILE="atom_gc.csv")
+    
+    DO I=1,N_ATOM
+       
+       WRITE(27, *) YEAR_ATOM(I), MONTH_ATOM(I), DAY_ATOM(I), &
+            TIME_ATOM(I), LON_ATOM(I), LAT_ATOM(I), ALT_ATOM(I), OH_GC(I), &
+            O3_GC(I), CO_GC(I), CH2O_GC(I), NO2_GC(I)
+       
+    ENDDO
+    
+    CLOSE(UNIT=27)
+    
+  END SUBROUTINE WRITE_ATOM_DATA
+!===============================================================================
+  SUBROUTINE COMPARE_ATOM_DATA
+    
+    USE GRID_MOD,           ONLY : GET_IJ
+    USE GRID_MOD,           ONLY : GET_XMID, GET_YMID
+    USE TIME_MOD,           ONLY : GET_MINUTE, GET_HOUR, GET_DAY
+    USE TIME_MOD,           ONLY : GET_YEAR, GET_MONTH
+    USE DAO_MOD,            ONLY : BXHEIGHT
+    USE TROPOPAUSE_MOD,     ONLY : ITS_IN_THE_TROP
+    USE COMODE_MOD,         ONLY : JLOP
+    USE COMODE_MOD,         ONLY : CSPEC
+    USE ADJ_ARRAYS_MOD,     ONLY : ID2C
+    USE TRACERID_MOD,       ONLY : IDNO2, IDOH, IDCH2O
+    USE TRACERID_MOD,       ONLY : IDTOX, IDTCO
+    USE TRACER_MOD,         ONLY : XNUMOLAIR, STT
+    USE CHECKPT_MOD,        ONLY : CHK_STT
+    USE DAO_MOD,            ONLY : AIRDEN
+    USE DAO_MOD,            ONLY : AD
+    USE TRACER_MOD,         ONLY : TCVV
+    USE COMODE_MOD,         ONLY : CSPEC_AFTER_CHEM, CSPEC
+    USE ADJ_ARRAYS_MOD,     ONLY : ID2C
+    USE DIAG_MOD,           ONLY : AD43, LTNO2, CTNO2
+    
+#include "CMN_SIZE"             ! size parameters
+#     include "CMN"             ! IFLX, LPAUSE
+!#     include "CMN_DIAG"        ! Diagnostic switches & arrays
+!#     include "CMN_O3"          ! FMOL, XNUMOL
+!#     include "comode.h"        ! IDEMS
+    
+    INTEGER                   :: I,J,L,K,M,N,NN
+    INTEGER                   :: IIJJ(2), L_ATOM, JLOOP
+    REAL*8                    :: YEAR, MONTH, DAY, HOUR, MINUTE, TIME 
+    REAL*8                    :: HEIGHT
+    REAL*8, PARAMETER         :: ADJ_TCVVOX = 28.97d0/48.d0
+    
+    MINUTE = REAL(GET_MINUTE(),8)
+    HOUR = REAL(GET_HOUR(),8)
+    DAY = REAL(GET_DAY(),8)
+    YEAR = REAL(GET_YEAR(),8)
+    MONTH = REAL(GET_MONTH(),8)
+    TIME = MINUTE + 100*HOUR
+    DO K=1,N_ATOM
+       !PRINT *, "MONTH_ATOM(K)", MONTH_ATOM(K)
+       
+       IF( (DAY == DAY_ATOM(K)) .AND. &
+            (YEAR == YEAR_ATOM(K)) .AND. &
+            (MONTH == MONTH_ATOM(K)) .AND. & 
+            ((TIME_ATOM(K)-TIME) >= 0 ) .AND. &
+            (LON_ATOM(K) >= -180 ) .AND. &
+            (LAT_ATOM(K) >= -90  ) .AND. &
+            ((TIME_ATOM(K)-TIME) < 30 ) ) THEN
+          !PRINT *, "LON", LON_ATOM(K)
+          !PRINT *, "LAT", LAT_ATOM(K)
+
+          IIJJ = GET_IJ(REAL(LON_ATOM(K),4),REAL(LAT_ATOM(K),4))
+          
+          !PRINT *,"K_ATOM",K
+          !PRINT *,"TIME_ATOM(K) - TIME", TIME_ATOM(K) - TIME
+          !PRINT *,"ALT_ATOM(K)", ALT_ATOM(K)
+          
+          I = IIJJ(1)
+          J = IIJJ(2)
+          
+          HEIGHT = 0d0
+          !PRINT *, " SHAPE OF STT", SHAPE(CHK_STT(:,:,:,:))
+          !PRINT *, " SHAPE OF CSPEC", SHAPE(CSPEC_AFTER_CHEM(:,:))
+          !PRINT *, "IDTCO INDEX", IDTCO
+          !PRINT *, "IDTOX INDEX", IDTOX
+          !PRINT *, "IDCH2O INDEX", ID2C(IDCH2O)
+          !PRINT *, "IDOH INDEX", ID2C(IDOH)
+          DO L=1,LLPAR
+             
+             !PRINT *,"ITS_IN_THE_TROP",ITS_IN_THE_TROP(I,J,L)
+             
+             HEIGHT = HEIGHT + BXHEIGHT(I,J,L)
+             
+             !PRINT *,"HEIGHT-ALT_ATOM(K)",  HEIGHT - ALT_ATOM(K)
+             
+             IF ( (HEIGHT .GE. ALT_ATOM(K)) ) THEN
+                
+                IF ( ITS_IN_THE_TROP(I,J,L) ) THEN
+                   JLOOP = JLOP(I,J,L)     
+                   !PRINT *, "JLOOP", JLOOP
+                   !O3_ATOM_GC(K) = CSPEC(JLOOP,IDNO2) 
+                   ! CO and O3 are in PPB, OH and CH2O are in PPT
+                   !CO_GC(K) = STT(I,J,L,IDTCO)* TCVV(IDTCO)/ AD(I,J,L) * 1d9
+                   !O3_GC(K) = STT(I,J,L,IDTOX)* TCVV(IDTOX)/ AD(I,J,L) * 1d9
+                   !CH2O_GC(K) = CSPEC(JLOOP,IDCH2O) * 1d18 / (AIRDEN(L,I,J) * XNUMOLAIR)
+                   !PRINT *, "CH2O_CSPEC", CH2O_GC(K)
+                   !OH_GC(K) = CSPEC(JLOOP,IDOH) * 1d18 / (AIRDEN(L,I,J) * XNUMOLAIR)
+                   !PRINT *, "OH_CSPEC", OH_GC(K)
+                   CO_GC(K) = CHK_STT(I,J,L,IDTCO)* TCVV(IDTCO)/ AD(I,J,L) * 1d9
+                   O3_GC(K) = CHK_STT(I,J,L,IDTOX)* TCVV(IDTOX)/ AD(I,J,L) * 1d9
+                   CH2O_GC(K) = CSPEC_AFTER_CHEM(JLOOP,ID2C(IDCH2O)) * 1d9 / (AIRDEN(L,I,J) * XNUMOLAIR)
+                   !PRINT *, "CH2O_CAFTER", CH2O_GC(K)
+                   OH_GC(K) = CSPEC_AFTER_CHEM(JLOOP,ID2C(IDOH)) * 1d9 / (AIRDEN(L,I,J) * XNUMOLAIR)
+                   NO2_GC(K) = CSPEC_AFTER_CHEM(JLOOP,ID2C(IDNO2)) * 1d9 / (AIRDEN(L,I,J) *XNUMOLAIR)
+                   !PRINT *, "OH_CAFTER", OH_GC(K)
+                  !PRINT *,"O3_ATOM_GC(K):",O3_ATOM_GC(K)
+                ENDIF
+                   
+                EXIT
+               
+             ENDIF
+
+          ENDDO
+          
+       ENDIF
+
+    ENDDO
+
+  END SUBROUTINE COMPARE_ATOM_DATA
+
+END MODULE ATOM_OBS_MOD
