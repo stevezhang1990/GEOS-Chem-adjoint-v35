@@ -1,0 +1,1991 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.9" />
+<title>GEOS-Chem Adjoint User Guide</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>GEOS-Chem Adjoint User Guide</h1>
+<span id="author">Xuesong Zhang</span><br />
+<span id="email"><code>&lt;<a href="mailto:xuesong.zhang@mail.utoronto.ca">xuesong.zhang@mail.utoronto.ca</a>&gt;</code></span><br />
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This document will provide instructions on downloading GEOS-Chem adjoint code, modifying configuration files (e.g. <em>Makefile</em>, <em>objects.*</em>, <em>Object.*</em> etc.) as well as setting up run files (e.g. <em>input.gcadj</em> and <em>input.geos</em> in directory <em>./gcadj_std.git/runs/v8-02-01/geos5</em>). Please note that this is not a stand-alone document. For complete information of GEOS-Chem adjoint model, please read <a href="http://acmg.seas.harvard.edu/geos/doc/man/index.html">GEOS-Chem Online User&#8217;s Guide</a> and <a href="http://adjoint.colorado.edu/~yanko/gcadj_std/GC_adj_man.pdf">GEOS-Chem Adjoint User&#8217;s Guide</a>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_what_is_geos_chem_and_geos_chem_adjoint">What is GEOS-Chem and GEOS-Chem adjoint?</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>In one sentence, GEOS-Chem model is a global 3D Chemical Transport Model (CTM) driven by the assimilated meteorological observations from the Goddard Earth Observing System (GEOS). GEOS-Chem adjoint model refers to an adjoint model derived from the GEOS-Chem CTM, which focuses on inverse modelling studies (e.g. sensitivity tests, data assimilation). In terms of product properties, the GEOS-Chem code package includes the GEOS-Chem model (which is a forward model). The GEOS-Chem adjoint code package includes both the GEOS-Chem forward model and its derivative adjoint model. If you would like to further understand what is GEOS-Chem and GEOS-Chem adjoint, here are some sources that are helpful:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a href="http://acmg.seas.harvard.edu/education/brasseur_jacob/index.html">Mathematical Modeling of Atmospheric Chemistry</a> by Brasseur G.P. and Jacob D.J. (draft in September, 2015)
+</dt>
+<dd>
+<p>
+This book provides theoretical backgrounds on CTMs in general. If you are interested in physical and chemical processes, numerical methods applied, model evaluation as well as inverse modelling studies of a CTM, then this book would be strongly recommended as your first reading. Currently, this book is not officially published. The password to access each chapter is "ctm". In the future when the book is available, it is recommended that you obtain a hard copy.
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="http://acmg.seas.harvard.edu/geos/geos_chem_narrative.html">Narrative description of the GEOS-Chem Model</a> by Atmospheric Chemistry Modelling Group at Harvard University (last updated in May, 2015)
+</dt>
+<dd>
+<p>
+This page provides a quick reference for GEOS-Chem features and capabilities. Some details on meteorological fields, model resolution, emission inventories, chemistry scheme, parameterization scheme etc. are introduced. If you would like to understand the theorectical backgrounds of these details, some published references are also available at the bottom of the page.
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="http://wiki.seas.harvard.edu/geos-chem/index.php/Main_Page">GEOS-Chem Harvard website Wiki Main Page</a> by Atmospheric Chemistry Modelling Group at Harvard University
+</dt>
+<dd>
+<p>
+This page provides a more detailed list on GEOS-Chem features and capabiities. You can also find some coding backgrounds (e.g. how to read each code, how to modify and debug the codes etc.) related to GEOS-Chem and analysis software (e.g. IDL, python). In fact, if you encounter any trouble when create/modify/compile codes within GEOS-Chem, you can always google "keywords" (e.g. "geos_chem_adj_mod") + "GEOS-Chem", and the corresponding wiki page explaining the code should appear on top of the google list.
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="http://acmg.seas.harvard.edu/geos/doc/man/index.html">GEOS-Chem Online User&#8217;s Guide</a> by Atmospheric Chemistry Modelling Group at Harvard University (last updated in June, 2015)
+</dt>
+<dd>
+<p>
+This guide provides an overview on installing, compiling and using the forward model code. Make sure you read the Online User&#8217;s Guide before reading the following instructions.
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="http://adjoint.colorado.edu/~yanko/gcadj_std/GC_adj_man.pdf">GEOS-Chem Adjoint User&#8217;s Guide</a> by Henze Group at Colorado Unversity, Boulder (last updated in June, 2015)
+</dt>
+<dd>
+<p>
+This guide provides an overview on installing, compiling and using the adjoint model code. Make sure you read the Adjoint User&#8217;s Guide before reading the following instructions.
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="http://adjoint.colorado.edu/~yanko/gcadj_std/GitLab_Tutorial.pdf">Gitlab Tutorial</a> by Henze Group at Colorado University, Boulder
+</dt>
+<dd>
+<p>
+This tutorial shows some features of Gitlab, which is helpful for version control of GEOS-Chem adjoint model. This is essential if you need to turn on/off particular features within the code, but still prefer the code to be stored in one directory (instead of creating multiple versions of GEOS-Chem adjoint codes in different directories). For example, let&#8217;s suppose you have a piece of code in general, naming it version A. If you modify the code to enable function \alpha, naming it version B. After that, you modify the code to enable function \beta, naming it version C. Gitlab helps to track all the changes you made, and you can recall the code with the designated version as long as you save the version using git. Otherwise, you have to store different versions of the code into different directories, or need to make those changes once again if you need to change from one version to another.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_guide_on_how_to_get_started_on_scinet_or_fujita_computing_server">Guide on how to get started on SciNet or fujita computing server</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>For both SciNet and fujita users, the first thing to do is to contact your supervisor to create a SciNet/fujita account. After that,</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+For SciNet users
+</dt>
+<dd>
+<p>
+Here are <a href="https://wiki.scinet.utoronto.ca/wiki/images/5/54/SciNet_Tutorial.pdf">the online guides of SCINet user tutorial</a>.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>In particular, some <a href="https://wiki.scinet.utoronto.ca/wiki/index.php/GPC_Quickstart">SciNet help wiki on GPC Quickstart</a> is also available.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+For fujita users
+</dt>
+<dd>
+<p>
+You need to go to Physics Computer Services (PCS) to create your accounts under fujin server user list (including animus and fujita01-07). After that, you could ask/email Gregory Wu about how to use the machine, and he will give you some instructions. (No printing guides for fujita so far. <a href="https://www.physics.utoronto.ca/physics-at-uoft/services/pcs">Here</a> is PCS&#8217;s homepage.)
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_download_geos_chem_adjoint_model_v35">Download GEOS-Chem adjoint model (V35)</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+For SciNet users
+</dt>
+<dd>
+<p>
+N/A
+</p>
+</dd>
+<dt class="hdlist1">
+For fujita users
+</dt>
+<dd>
+<p>
+To download the standard GEOS-Chem adjoint model, it is recommanded you use animus or any other linux machine that has git installed. SSH to your account, and then type the command:
+</p>
+</dd>
+</dl></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>git clone ssh://git@adjoint.colorado.edu:2222/yanko.davila/gcadj_std.git</code></pre>
+</div></div>
+<div class="paragraph"><p>This will download a project directory "gcadj_std" containing code and run subdirectories. To explain the file name, "gc" stands for GEOS-Chem. "adj" stands for adjoint code. "std" stands for standard code. "git" means that this code is actively tracked by Gitlab. So all together, you end up getting a GEOS-Chem adjoint model standard code. Recall that for adjoint code you have both the forward GEOS-Chem model and the adjoint model. For its subdirectories, <em>./gcadj_std.git/code</em> section includes all the programs that contribute to GEOS-Chem forward and adjoint model. <em>./gcadj_std.git/run</em> section includes all the option/configuration files that allow you to choose how to run your model.</p></div>
+<div class="paragraph"><p>If you have already been provided with a GEOS-Chem adjoint model V35 code, you are strongly recommended to contact the original code owner (the person who wrote/modified the code or the person who passed the code to you). If the code owner uses Gitlab to track their modifications/updates on the code, please visit <a href="http://adjoint.colorado.edu:8080/">GEOS-Chem Gitlab</a> to check their branch and see what has been modified. If the code owner does not use Gitlab, then you must contact with the code owner personally, and let the owner tell you what has been changed.</p></div>
+<div class="paragraph"><p>For the worst case scenario, if you cannot contact the code owner, and the owner does not use Gitlab, then the "primitive" way to track what the coder has done is to go to each directory (e.g. <em>./gcadj_std_modified/code/</em>), and see which file has been modified. You can either look for files with <em>*.f/f90~</em>, <em>#*.f/f90#</em> patterns or type emacs on a folder (NOT ON A FILE) (e.g. <code>emacs ./gcadj_std_modified/code/obs_operators</code>) to observe each file&#8217;s properties (e.g. creating/modifying time etc.). After that, for all the modified codes, type command <code>diff</code> for each of them in order to see what has been changed. For example, you found there was <em>mopitt_co_obs_mod.f\~</em> under <em>./gcadj_std_modified/code/obs_operators</em>. Then, you should download the standard code, then compare the standard code with the modified code by typing:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>diff ./gcadj_std.git/code/obs_operators/mopitt_co_obs_mod.f ./gcadj_std_modified/code/obs_operators/mopitt_co_obs_mod.f</code></pre>
+</div></div>
+<div class="paragraph"><p>The output will give you what has been modified. Then, move to the next modified file and repeat the same&#8230;</p></div>
+<div class="paragraph"><p>As you can see, such "primitive" method to track a code takes times and effort. It is also casual, and easy to miss out key changes. If you are going to work with GEOS-Chem for a while, you should use Gitlab ASAP.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configure_geos_chem_adjoint_model_v35">Configure GEOS-Chem adjoint model (V35)</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Whether you have a standard code or a modified code, these gcadj_std codes do not require any installation. However, some other programs are required to install before running these codes. These required supporting programs are called "library". (For instance, in your local computer, if you have all the pdfs downloaded, but without proper pdf reader to open it, then nothing can be read or modified. A proper pdf reader in this case is the library for reading pdfs.)</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+For SciNet users
+</dt>
+<dd>
+<p>
+Since the users in SciNet are unable to install system files (including libraries) themselves, the technicians of Compute Canada has already installed some libraries that should be good enough to support GEOS-Chem adjoint model (V35). If you encounter any issue with the libraries due to version updates etc., you should email your supervisor ASAP and let them contact the techicians from Compute Canada.
+</p>
+</dd>
+<dt class="hdlist1">
+For fujita users
+</dt>
+<dd>
+<p>
+A full GEOS-Chem library has been installed by Yanko Davila at <em>/home/ydavila/GC_Library/</em>.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Now, libraries should be ready. And the GEOS-Chem adjoint code is ready as well. What to do next is to link the installed libraries to the GEOS-Chem adjoint code so that the gcadj_std code can be compiled successfully.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+For SciNet users
+</dt>
+<dd>
+<p>
+To set the environment properly, you should go to your code&#8217;s run directory (e.g.<em>/scratch/d/djones/USER_NAME/gcadj_std.git/runs/v8-02-01/geos5/</em>) and open the run file. Add the following lines to the run script to load the appropriate libraries:
+</p>
+</dd>
+</dl></div>
+<div class="listingblock">
+<div class="title"><em>run</em> file</div>
+<div class="content">
+<pre><code>****************************************
+module load intel/14.0.1
+module load hdf5/1811-v18-serial-intel
+module load netcdf/4.2.1.1_serial-intel
+ROOT_LIBRARY_DIR=/scinet/gpc/Libraries/netcdf-4.2.1.1/serial_intel/
+GC_BIN=$ROOT_LIBRARY_DIR/bin
+GC_INCLUDE=$ROOT_LIBRARY_DIR/include
+GC_LIB=$ROOT_LIBRARY_DIR/lib
+export GC_LIB
+export GC_BIN
+export GC_INCLUDE
+ulimit -s unlimited</code></pre>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+For fujita users
+</dt>
+<dd>
+<p>
+You first need to modify your <em>.bashrc</em> file, which should be available in diretory: <em>/home/USER_NAME/</em> <em>.bashrc</em> file includes a series of configurations for the terminal session, including setting up your working directories,, the shell history, library path, compiler etc. This file will be excecuted whenver a new terminal session starts in the interactive mode. In other words, let&#8217;s say if you modify any commands in <em>.bashrc</em> file, the impact will take place after you restart this terminal session (exit, and then ssh to login again) or create another terminal session.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>To configure your <em>.bashrc</em> file, here is an example to look at:</p></div>
+<div class="listingblock">
+<div class="title"><em>.bashrc</em> file</div>
+<div class="content">
+<pre><code>******************************************************************
+# .bashrc
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+
+#-------Intel Compiler environment --------
+if [ "$HOSTNAME" = "fujita01.atmosp.physics.utoronto.ca" ]; then
+  source /opt/intel/Compiler/11.1/080/bin/ifortvars.sh intel64
+  export OMP_NUM_THREADS=8
+  export F_UFMTENDIAN=big
+  export KMP_STACKSIZE=32m
+  ulimit -s 32000000
+fi
+
+if [ "$HOSTNAME" = "fujita02.atmosp.physics.utoronto.ca" ]; then
+  source /opt/intel/composer_xe_2013.0.079/bin/compilervars.sh intel64
+  export OMP_NUM_THREADS=32
+  export F_UFMTENDIAN=big
+  export KMP_STACKSIZE=32m
+  ulimit -s 32000000
+fi
+
+if [ "$HOSTNAME" = "fujita03.atmosp.physics.utoronto.ca" ]; then
+  source /opt/intel/composer_xe_2013.0.079/bin/compilervars.sh intel64
+  export OMP_NUM_THREADS=32
+  export F_UFMTENDIAN=big
+  export KMP_STACKSIZE=32m
+  ulimit -s 32000000
+fi
+
+if [ "$HOSTNAME" = "fujita04.atmosp.physics.utoronto.ca" ]; then
+  source /opt/intel/composer_xe_2013.0.079/bin/compilervars.sh intel64
+  export OMP_NUM_THREADS=32
+  export F_UFMTENDIAN=big
+  export KMP_STACKSIZE=32m
+  ulimit -s 32000000
+fi
+
+if [ "$HOSTNAME" = "fujita05.atmosp.physics.utoronto.ca" ]; then
+  source /opt/intel/Compiler/11.1/080/bin/ifortvars.sh intel64
+  export OMP_NUM_THREADS=8
+  export F_UFMTENDIAN=big
+  export KMP_STACKSIZE=32m
+fi
+
+if [ "$HOSTNAME" = "fujita06.atmosp.physics.utoronto.ca" ]; then
+  source /opt/intel/composer_xe_2013.0.079/bin/compilervars.sh intel64
+  export OMP_NUM_THREADS=16
+  export F_UFMTENDIAN=big
+  export KMP_STACKSIZE=32m
+  ulimit -s 32000000
+fi
+
+if [ "$HOSTNAME" = "fujita07.atmosp.physics.utoronto.ca" ]; then
+  source /opt/intel/composer_xe_2013.0.079/bin/compilervars.sh intel64
+  export OMP_NUM_THREADS=16
+  export F_UFMTENDIAN=big
+  export KMP_STACKSIZE=32m
+  ulimit -s 32000000
+fi
+
+# Python environment
+export PATH=/usr/local/package/science/epd/epd/bin:$PATH
+
+# IDL environment
+IDL_STARTUP=/home/xzhang/IDL/idl_startup.pro
+export IDL_STARTUP
+
+# NetCDF environment (GEOS-Chem library)
+export PATH=/home/ydavila/GC_Library/bin/:$PATH
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/ydavila/GC_Library/lib
+export LD_LIBRARY_PATH
+
+# Specify NetCDF environment subdirecotries
+export GC_BIN=/home/ydavila/GC_Library/bin
+export GC_LIB=/home/ydavila/GC_Library/lib
+export GC_INCLUDE=/home/ydavila/GC_Library/include
+**********************************************************************</code></pre>
+</div></div>
+<div class="paragraph"><p>In the <em>.bashrc</em> file, 3 components are included: global definitions of <em>.bashrc</em> file, compiler specification, and library specification.</p></div>
+<div class="paragraph"><p>For the compiler setup, fujita01 is used as system node. You should not run any GEOS-Chem code in this node. fujita02-04 are used for running GEOS-Chem codes for advanced users. fujita05-fujita07 are used for running GEOS-Chem codes for primary users. All these nodes can be compiled using either Intel Fortran Compiler 11.1 or Intel Composer XE 2013. Make sure you contact your supervisor and Physics Computer Service (PCS) to activate one of these accounts. The following information shows the technical properties of each fujita node:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+fujita01
+</dt>
+<dd>
+<p>
+Intel Xeon E5410 2.33 GHz: 16GB RAM, 8 cores, no hyper-threading
+</p>
+</dd>
+<dt class="hdlist1">
+fujita02-04
+</dt>
+<dd>
+<p>
+Intel Xeon E5-2650v2, 2.6 GHz: 128GB RAM, 16 cores, 32 threads
+</p>
+</dd>
+<dt class="hdlist1">
+fujita05
+</dt>
+<dd>
+<p>
+Intel Xeon E5410 2.33 GHz: 8GB RAM, 8 cores, no hyper-threading
+</p>
+</dd>
+<dt class="hdlist1">
+fujita06-07
+</dt>
+<dd>
+<p>
+Intel Xeon E5620 2.4 GHz: 32GB RAM, 8 cores, and 16 threads
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>For the software setup, you need to specify NetCDF and related libraries to support GEOS-Chem, IDL library to support gamap (GEOS-Chem output analysis software), and python library to support python (coding software).</p></div>
+<div class="paragraph"><p>Second part of the configuration requires you to look at Makefile in directory <em>./gcadj_std.git/code/</em>. Nowadays, no matter whether you use SciNet or fujita servers, you DO NOT need to modify this file as long as you follow the standard procedure above. Your Makefile should be the same as the default standard code. If your Makefile is non-standard, please contact the original code owner for more information.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_geos_chem_adjoint_model_em_code_em_subdirectories">GEOS-Chem adjoint model <em>code</em> subdirectories</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>After the initial configuration, let&#8217;s get to know some other important files\folders under <em>./gcadj_std.git/code/</em>. Recall that code subdirectory is the section computing both forward model and adjoint model. In general, here are several files\folders that might require modification based on your project:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<em>Dependencies.mk</em>
+</dt>
+<dd>
+<p>
+Dependencies listing for each file. If you are creating new file in <em>./gcadj_std.git/code/</em>, then you will need to create a dependency statement here.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>Makefile</em>
+</dt>
+<dd>
+<p>
+Compilation environment setup file. If you are creating a new file (mostly for adjoint calculation), then you will need to create a new compilation statement here.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>Objects.default</em>
+</dt>
+<dd>
+<p>
+All the default compiled object files (<em>*.o</em>) used in both forward and adjoint model. If you are creating new file for forward modelling calculation, then you will need to create an object statement here.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>Objects.mk</em>
+</dt>
+<dd>
+<p>
+All the compiled object files (<em>*.o</em>) used in both forward and adjoint model. Your modification should be similar as how <em>Objects.default</em> is modified.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>Objects.mkl</em>
+</dt>
+<dd>
+<p>
+All the compiled object files (<em>*.o</em>) used in both forward and adjoint model. Usually you don&#8217;t need to modify this file
+</p>
+</dd>
+<dt class="hdlist1">
+<em>objects.sh</em>
+</dt>
+<dd>
+<p>
+Compiling option file. You will notice that in this file, different modes (<code>HDF</code>, <code>SAT_NETCDF</code>, etc.) compile different sets of codes. You will modify this file after you create new adjoint-related functions (e.g. new observation operators). For instance, if you create a new OMI HCHO observation operator, which has HDF-related functions in the code, then you need to add <em>omi_hcho_obs_mod.o</em> under HDF compiling options. When you trigger <code>HDF</code> compiling options in your run file (under <em>./gcadj_std.git/runs/v8-02-01/geos5_test</em>), the OMI HCHO observation operator will be compiled. Here are some brief explanations on several known modes:
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>DEFAULT</code>
+</dt>
+<dd>
+<p>
+          Other than the standard forward and adjoint codes, no additional functions (e.g. observation operator, radiative transfer model (RTM)) are compiled.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>LIDORT</code>
+</dt>
+<dd>
+<p>
+          Other than the standard forward and adjoint codes, LIDORT (a RTM) is also compiled.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>HDF</code>
+</dt>
+<dd>
+<p>
+          Other than the standard forward and adjoint codes, the HDF4/5-enabled codes are also compiled. (HDF4/5 refers to a dataset format applied to various satellite retrieval data (e.g. OMI, MLS).
+</p>
+</dd>
+<dt class="hdlist1">
+<code>SAT_NETCDF</code>
+</dt>
+<dd>
+<p>
+          Other than the standard forward and adjoint codes, the NetCDF-enabled codes are also compiled. (NetCDF refers to a dataset format applied to various satellite retrieval data (e.g. TES).
+</p>
+</dd>
+<dt class="hdlist1">
+<code>HDF_NETCDF</code>
+</dt>
+<dd>
+<p>
+          Other than the standard forward and adjoint codes, both HDF4/5-enabled and NetCDF-enabled codes are also compiled. It is a mandatory setup when you assimilate various datasets at the same time.
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">If you use <code>off-diagonal</code> or <code>Compute BFGS inverse Hessian</code> modes, please contact your supervisor for further information.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<em>define.h</em>
+</dt>
+<dd>
+<p>
+Model resolution and compiler type selection file. For example, if you would like to compile a GEOS-Chem model with GEOS5 global meteorological field using linux fortran compiler (which is the compiler for both SciNet and fujita), then you need to uncomment
+</p>
+</dd>
+</dl></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>#define GRID4x5  'GRID4x5'
+#define GRIDREDUCED 'GRIDREDUCED'
+#define LINUX_IFORT 'LINUX_IFORT'
+#define IN_CLOUD_OD  'IN_CLOUD_OD' (Note: this comment is for geos5 only)</code></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">If you need to shift from a global model to a regional model, please follow <a href="http://wiki.seas.harvard.edu/geos-chem/index.php/Setting_up_GEOS-Chem_nested_grid_simulations">nested-grid model guides</a>.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<em>modified/</em>
+</dt>
+<dd>
+<p>
+The folder including all forward model calculation. In particular, <em>geos_chem_mod.f</em> in <em>/gcadj_std.git/code/modified/</em> is the main code that supports forward calculation. If you would like to create code that modify or diagnose the forward model calculation, then you need to create file under this folder.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>obs_operators/</em>
+</dt>
+<dd>
+<p>
+The folder including all the observation operator files for satellite retrieval inverse modelling/data assimilation calculation. If you would like to create new observation operator, then you need to create file under this folder.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>adjoint/</em>
+</dt>
+<dd>
+<p>
+The folder including all the adjoint model calculation, In particular, <em>geos_chem_adj_mode.f</em> and <em>inverse_driver.f</em> in <em>/gcadj_std.git/code/modified/</em> are the main codes that support adjoint calculation. If you have created a new observation operator, then you need to modify these two files. Please learn from a similar observation operator (and see how it is written in those files) as your example.
+</p>
+</dd>
+<dt class="hdlist1">
+<em>adjoint/define_adj.h</em>
+</dt>
+<dd>
+<p>
+Observation operator selection file. Uncomment particular observation operator(s) if you would like to use it(them). Here is an example of using MOPITT CO observation operator.
+</p>
+</dd>
+</dl></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>(...)
+!----------CO observations------
+! pick any combination
+! =&gt; MOPITT CO
+!    =&gt; MOPITT v3
+!    =&gt; MOPITT v4
+!    =&gt; MOPITT v5
+! =&gt; AIRS CO
+! =&gt; SCIA Bremen CO
+!#define  MOPITT_V3_CO_OBS 'MOPITT_V3_CO_OBS'
+!#define  MOPITT_V4_CO_OBS 'MOPITT_V4_CO_OBS'
+#define  MOPITT_V5_CO_OBS 'MOPITT_V5_CO_OBS'
+!#define  AIRS_CO_OBS     'AIRS_CO_OBS'
+!#define  SCIA_BRE_CO_OBS   'SCIA_BRE_CO_OBS'
+(...)</code></pre>
+</div></div>
+<div class="paragraph"><p>So far, here are the most common codes that require modification before you execute your code. If you need to modify other codes, please use <a href="http://acmg.seas.harvard.edu/geos/doc/man/index.html">GEOS-Chem model user guide</a> for further details.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">Now, after you setup all the dependencies, the compiling environment, observation operators as well as the model resolution, you are ready to move on to <em>run</em> subdirectories.</td>
+</tr></table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_geos_chem_adjoint_model_em_run_em_subdirectories">GEOS-Chem adjoint model <em>run</em> subdirectories</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><em>run</em> subdirectories determine how to run <em>code</em> section. Here, we specifically focus on GEOS-Chem adjoint model <em>run</em> directory used for GEOS5 meteorogical field. Here are several files and folders in <em>./gcadj_std.git/run/v8-02-01/geos5</em> that might require modification based on your project:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<em>restart.geos5.4x5.YYYYMMDDHH</em>
+</dt>
+<dd>
+<p>
+Restart file that pre-defines the initial conditions of various tracer concentrations. You must have this file with the correct resolution (in this case: 4x5) as well as the correct date.
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">the default starting period of the model should be 20050701. Let&#8217;s say you need to run the model from 20100101 to 20110101, whereas you don&#8217;t have the restart file on that day, then ask your supervisor to provide you the restart file. (You should not generate your own restart file by running the forward model from 20050701 to 201001001 and save the restart file, until you have contacted your supervisor.)</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<em>input.geos</em>
+</dt>
+<dd>
+<p>
+GEOS-Chem forward model input file. You can select the period of your runs, emission inventory (including specify the inventory directory), diagnostic options as well as whether to save restart files. You can also save the boundary conditions here in order to be used for regional studies. Here are several menus that you need to pay attention:
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+First of all, under most conditions, the following menus do not require any modification:
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>TRACER MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>GAMAP MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>BENCHMARK MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>UNIX CMDS MENU</code>
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+For following menus, use <em>T(F)</em> to turn on(off) particular option(s):
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>TRANSPORT MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>CONVECTION MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>EMISSIONS MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>AEROSOL MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>DEPOSITION MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>CHEMISTRY MENU</code>
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+For following menus, you need to pay a bit more attention:
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>SIMULATION MENU</code>
+                   <br />
+                    When you set your start time, make sure you already have the restart file on that date. Somehow the model also prefers the start hour to be only <code>000000</code>.
+</p>
+</li>
+<li>
+<p>
+<code>OUTPUT MENU</code>
+</p>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+By entering <code>3</code>, you set a tick to start or stop your time window. <code>3</code> also means that an output will be saved by the end of the time window. Hence, make sure you put <code>3</code> at the time period you set in <code>SIMULATION MENU</code>.
+</p>
+</li>
+<li>
+<p>
+By entering <code>0</code>, the model would not save any output until a <code>3</code> shows up.
+</p>
+</li>
+<li>
+<p>
+In fact, any <code>3</code> or <code>0</code> outside the time window is not going to be read by the model.
+</p>
+</li>
+<li>
+<p>
+Here is an example, if you would like to start at July 1st and end on July 10th, please set your <code>OUTPUT MENU</code> as:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>Schedule output for JUL : 3000000003000000000000000000000</code></pre>
+</div></div>
+<div class="paragraph"><p>You will get outputs that average the data (e.g. O3 concentrations) from July 1st to July 10th.</p></div>
+<div class="paragraph"><p>Instead, if you would like outputs for everyday from the same time period, then your <code>OUTPUT MENU</code> should like like this:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Schedule output for JUL : 3333333333000000000000000000000</code></pre>
+</div></div>
+<div class="paragraph"><p>If you would like two averages (one from 1st to 3rd, one from 3rd to 10th), then your <code>OUTPUT MENU</code> will be:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Schedule output for JUL : 3030000003000000000000000000000</code></pre>
+</div></div>
+</li>
+</ol></div>
+</li>
+<li>
+<p>
+<code>DIAGNOSTIC MENU</code>
+</p>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+All the basic diagnostics (concentrations, mass fluxes, sources, depositions) except for adjoint diagnostics (e.g. scaling factor, adjoint forcing gradient, cost function, satellite diagnostics) will be saved in <em>ctm.bpch</em> under <em>./gcadj_std.git/runs/v8-02-01/runs/geos5</em>. There are also <em>ctm.bpch.N</em> being saved while the code is running. These are diagnostic files for each iteration. <em>ctm.bpch</em>, in particular, is the updated diagnostics based on the latest iteration. For instance, if your run needs 30 iterations, then <em>ctm.bpch.30</em> or <em>ctm.bpch</em> (only if your run has finished up to 30 iterations) will be your posteriori outputs. To get the a priori, you need to run only forward model in order to retrieve <em>ctm.bpch.0</em>. Go to <a href="#X2"><em>run</em> instructions</a> on how to run forward model only.
+</p>
+</li>
+<li>
+<p>
+For <code>DIAGNOSTIC MENU</code>
+</p>
+<div class="olist lowerroman"><ol class="lowerroman">
+<li>
+<p>
+<code>L</code> means which vertical level(s) you would like to save. <code>0</code> means no level (nothing) is saved. <code>1</code> means surface level is saved. <code>47</code> means all vertical levels are saved.
+</p>
+</li>
+<li>
+<p>
+<code>Tracers to print out for each diagnostics</code> means which tracer(s) you would like to save. <code>all</code> means all tracers involved in your tracer and chemistry menu will be saved. <code>N</code> refers to the specific tracer index that can be referenced in the tracer menu. For example, if <code>4</code> appears, then CO will be saved in the diagnostic specifically.
+</p>
+</li>
+</ol></div>
+</li>
+</ol></div>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+These menu only need to be turned on if necessary. Check <a href="http://adjoint.colorado.edu/~yanko/gcadj_std/GC_adj_man.pdf">the adjoint model guide</a> for further information.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>PLANEFLIGHT MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>ND48/49/50/51 MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>PROD &amp; LOSS MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>ARCHIVED OH/O3 P/L MENU</code>
+</p>
+<div class="paragraph"><p>Usually you don&#8217;t need to change anything here. For OH, you may notice that the model seems to read GEOS-Chem version 5 OH profile despite the forward model has a version 9/10. This is because version 5 produces the most realistic mean OH concentration so far. If you would like to do experiments involving varying mean OH/O3 profiles, then this menu should be modified.</p></div>
+</li>
+<li>
+<p>
+<code>NESTED GRID MENU</code>
+</p>
+<div class="paragraph"><p>You only turn them on when you do regional studies. A detailed instruction on how to run nested-grid GEOS-Chem is available <a href="http://wiki.seas.harvard.edu/geos-chem/index.php/Setting_up_GEOS-Chem_nested_grid_simulations">online</a>.</p></div>
+</li>
+</ul></div>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+<em>input.gcadj</em>
+</dt>
+<dd>
+<p>
+GEOS-Chem adjoint model input file. You can select the inverse modelling/data assimilation algorithms, turn on/off chemistry or aerosols, the a priori, specify the output directory, whether to optimize emission/initial condition/reaction rate of a certain tracer, what to observe in adjoint forcing arrays, as well as several adjoint diagnostic options. You can also specify whether to do a finite difference test for sensitvity studies.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+For following menus, use <code>T(F)</code> to turn on(off) particular functions:
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>ADJOINT SIMULATION MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>FORWARD MODEL OPTIONS</code>
+</p>
+</li>
+<li>
+<p>
+<code>ADJOINT MODEL OPTIONS</code>
+</p>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">No matter what studies you do (even if you are doing a forward model run only), you have to turn <code>LADJ</code> on. Besides that, choose proper option for your inverse modelling/data assmilation studies.</td>
+</tr></table>
+</div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">In some versions of this file, you may notice there are typos such as <code>Selecet</code> (Line 5) or <code>Invese</code> (Line 6). In fact, they will not have an impact on your model. In other words, if you change them to <code>Select</code> or <code>Inverse</code> respectively, they should produce identical results as the typo version.</td>
+</tr></table>
+</div>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+For following menus, you need to pay a bit more attention:
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>DIRECTORIES</code>
+</p>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+<em>OptData/</em>
+</p>
+<div class="paragraph"><p>Folder saves the cost function, adjoint forcing gradient outputs, scaling factors outputs as well as satellite diagnostics.</p></div>
+</li>
+<li>
+<p>
+<em>adjtmp/</em>
+</p>
+<div class="paragraph"><p>Folder saves the temporary files produced from the forward model run in order to read by the adjoint model.</p></div>
+</li>
+<li>
+<p>
+<em>diagadj/</em>
+</p>
+<div class="paragraph"><p>Folder saves the adjoint diagnostics.</p></div>
+</li>
+</ol></div>
+</li>
+<li>
+<p>
+<code>CONTROL VARIABLE MENU</code>
+</p>
+<div class="paragraph"><p>At first, you need to turn on/off initial conditions/emissions/strat prod/loss to select which tracer you would like to optimize. If you turn off any option, then the corresponding detailed options displayed underneath would not matter. For example, if <code>LADJ_EMS</code> is <code>F</code>, then any settings under <code>FOR LADJ_EMS</code> will be diasabled.</p></div>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+For <code>LICS</code>, when you specify the optimized tracer, the tracer index is based the <code>TRACER MENU</code> in <em>input.geos</em>. For example, the following codes explain how to optimize O3 initial conditions with the default scaling factor being 1: (if you want half of the O3 concentration, set <code>SF</code> to be 0.5. Usually <code>SF</code> not being <code>1</code> should be assigned for pseudo-obs or OSSE studies)
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>(...)
+&gt;------------------------------&lt;
+          FOR LICS             :
+NSOPT: number of tracers opt   : 1
+  =&gt; opt these tracers------&gt;  : TRC# trc_name SF_DEFAULT REG_PARAM ERROR
+Tracer  #1                     : 2    Ox       1          1         1
+(...)</code></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">For now, we don&#8217;t quite understand how <code>REG_PARAM</code> or <code>ERROR</code> is going to impact the assimilation results.</td>
+</tr></table>
+</div>
+</li>
+<li>
+<p>
+For <code>LADJ_EMS</code>, only the emission type shown underneath is available. You cannot create your own emission type since the emission will be unavailable in the model. Once you turn on an existing emission type, follow the similar instructions as <code>FOR LICS</code>. For example, if you would like to turn on anthropogenic CO emissions, you should have:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>(...)
+%%% CONTROL VARIABLE MENU %%%
+Initial conditions LICS        : F
+... OR emissions   LADJ_EMS    : T
+(...)
+&gt;------------------------------&lt;
+          FOR LADJ_EMS         :
+NNEMS: ems groups implemented  : 33
+(...)
+Emission #28                   : 28   IDADJ_ECO_an   T    1          1         0.2       100     100
+(...)</code></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">This section is directly related to <code>NOBS</code> as well as <code>NOBS_CSPEC</code>. As you can see from the files in <em>./gcadj_std.git/code/obs_operators/</em>, some observation operators require functions <code>STT_ADJ</code> or <code>CSPEC_AFTER_CHEM</code>. The principle is that as long as <code>STT_ADJ</code> exists in an activated observation operator, you have to add the tracer to <code>NOBS</code>. Similarly, if your activated observation operator has <code>CSPEC_AFTER_CHEM</code>, you have to add the species to <code>NOBS_CSPEC</code>. For example, if I turn on MOPITT CO as well as TES O3 observation operator, then your <code>NOBS</code> and <code>NOBS_CSPEC</code> will look like this:</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre><code>(...)
+&gt;------------------------------&lt;
+NOBS: number of tracers to obs : 1
+  =&gt; obs these tracers------&gt;  : TRC# tracer_name
+Tracer  #1                     : 2    Ox
+&gt;------------------------------&lt;
+NOBS_CSPEC: # of species to obs: 2
+  =&gt; obs these species------&gt;  : species_name
+Species #1                     : CO
+Species #2                     : O3
+(...)</code></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">Another understanding of the principle is that <code>STT_ADJ</code> is mostly used for stratospheric model observation comparison, whereas <code>CSPEC_AFTER_CHEM</code> is mostly used for tropospheric model observation comparison. Hence, you will assgin tracer under <code>NOBS(NOBS_CSPEC)</code> if the observation applies for stratosphere(troposphere). But keep in mind that this is not always true.</td>
+</tr></table>
+</div>
+</li>
+</ol></div>
+</li>
+<li>
+<p>
+<code>WEAK CONSTRAINT MENU</code>
+</p>
+<div class="paragraph"><p>This is an optional menu (in standard code from gitlab, you might not see this menu in this file) that applies weak constraint 4D-var algorithm instead of the default (strong constraint) 4D-var. Please contact your supervisor if you need to turn on this menu.</p></div>
+</li>
+<li>
+<p>
+<code>DIAGNOSTICS MENU</code>
+</p>
+<div class="olist loweralpha"><ol class="loweralpha">
+<li>
+<p>
+<code>General</code> is going to print all the debugging info on the screen, and give you diagnostics (adjoint forcing gradient etc.) for each time step throughout the time window.
+</p>
+</li>
+<li>
+<p>
+<code>CO satellite diagnostics</code> are ONLY for users who turn on MOPITT CO observation operator.
+</p>
+</li>
+</ol></div>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+For following menu, please read <a href="http://adjoint.colorado.edu/~yanko/gcadj_std/GC_adj_man.pdf">the GEOS-Chem adjoint model user guide</a> for more information.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+<code>OBSERVATION MENU</code>
+</p>
+</li>
+<li>
+<p>
+<code>FINITE DIFFERENCE MENU</code>
+</p>
+</li>
+</ul></div>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+<div class="paragraph"><p>So far we introduce the most common files/folders that require modification before you execute your version of the GEOS-Chem adjoint model. Please use <a href="http://adjoint.colorado.edu/~yanko/gcadj_std/GC_adj_man.pdf">the GEOS-Chem adjoint model user guide</a> for further details.</p></div>
+<div class="dlist" id="X2"><dl>
+<dt class="hdlist1">
+<em>run</em>
+</dt>
+<dd>
+<p>
+GEOS-Chem adjoint model executables (similar to the <em>*.exe</em> when you double click to access a software in windows/mac). You can select the starting and finishing iterations, specify run directories, as well as choose which mode you would like to run the codes (the mode refers to the settings in <em>object.sh</em> in <em>code</em> subdirectory).
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+Iteration number setup:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>(...)
+# Set the start (or current ) iteration number
+X=1
+
+# Set the stopping iteration number
+XSTOP=4
+
+# Give every run a unique name (default is $PBS_JOBID)
+RNAME=gcadj_std.git
+
+# Specify Type of Run "DEFAULT, HDF, SAT_NETCDF, LIDORT"
+TYPE=SAT_NETCDF
+(...)</code></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Run forward model only, specify <code>X=XSTOP=0</code>.
+</p>
+</li>
+<li>
+<p>
+Run the first iteration only, specify <code>X=XSTOP=1</code>.
+</p>
+</li>
+<li>
+<p>
+Run 15 full iterations, specify <code>X=1, XSTOP=15</code>.
+</p>
+</li>
+<li>
+<p>
+Run 15 iterations in two steps, specify <code>X=1, XSTOP=N</code> (<code>1&lt;N&lt;15</code>, <code>N</code> is integer). Then specify <code>X=N, XSTOP=15</code> in the same <em>run</em> subdirectories.
+</p>
+</li>
+<li>
+<p>
+Output the diagnostic for iteration N (make sure you already have interation N calculated before), specify <code>X=N, XSTOP=N</code>.
+</p>
+</li>
+<li>
+<p>
+Make sure which sets of library you would like to use so that you know which type of runs you do. (More reference on <em>objects.sh</em>)
+</p>
+</li>
+</ul></div>
+</li>
+<li>
+<p>
+Run directories setup:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>(...)
+# Directory in the package where the executable runs
+DRUNDIR=runs/v8-02-01/geos5_test
+
+# Directory in the package with the source code
+DCODE=code
+
+# Package directory name
+DPACK=$RNAME
+
+# Directory where run packages are unpacked and run
+#DRUN=/scratch/d/djones/USER_NAME/  #for scinet
+DRUN=/users/jk/09/USER_NAME/        #for fujita
+
+# Directory where run packages are stored and saved (if not saved locally)
+DSAVE=
+
+# Directory where run packages are backed up (if not saved locally)
+DARCHIVE=
+(...)
+#  Set number of threads
+export OMP_NUM_THREADS=8 #16 for scinet, 16 or 24 for fujita02-04, 8 for fujita05, 8 or 16 for fujita06-07.
+(...)</code></pre>
+</div></div>
+<div class="paragraph"><p>Starting from here, you keep rest of the code as default. The GEOS-Chem adjoint model should be ready to start.</p></div>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">If you would like to do multiple species data assimilation, and your data format includes more than one type (e.g. if you would like to use MOPITT CO and TES O3 at the same time. And they are HDF5 and NetCDF format respectively), then you need to use <code>HDF_NETCDF</code> mode. This mode is not included in the standard code. To create this mode, you need to change <em>object.sh</em> under <em>/gcadj_std.git/code/</em> and the run file mentioned here. The detailed changes are shown as follows:</td>
+</tr></table>
+</div>
+<div class="listingblock">
+<div class="title"><em>objects.sh</em></div>
+<div class="content">
+<pre><code>(...)
+
+if [ $1 = "DEFAULT" ]; then
+mv Objects.mkl Objects.mk
+fi
+
+#starting from here, you create mode HDF_NETCDF
+if [ $1 = "HDF_NETCDF" ]; then
+
+find="rpmares_mod.o"
+replace="rpmares_mod.o                 \
+gosat_co2_mod.o               \
+tes_nh3_mod.o                 \
+tes_o3_mod.o                  \
+tes_o3_irk_mod.o"
+
+sed -e "s/$find/$replace/g" Objects.mkl &gt; output1
+
+find="tes_ch4_mod.o"
+replace="tes_ch4_mod.o                 \
+scia_ch4_mod.o"
+
+sed -e "s/$find/$replace/g" output1 &gt; output2
+#rm output1
+#mv output Objects.mk
+
+find="getifsun.o"
+replace="getifsun.o                    \
+gvchsq.o "
+sed -e "s/$find/$replace/g" output2 &gt; output3
+
+find="input_mod.o"
+replace="input_mod.o            \
+He4IncludeModule.o            \
+He4ErrorModule.o              \
+He4GridModule.o               \
+He4SwathModule.o              \
+findinv.o                     \
+airsv5_mod.o                  \
+airs_co_obs_mod.o             \
+HdfIncludeModule.o            \
+HdfSdModule.o                 \
+HdfVdModule.o                 \
+omi_no2_obs_mod.o             \
+interp.o                      \
+gaussj.o                      \
+mopitt_obs_mod.o"
+sed -e "s/$find/$replace/g" output3 &gt; output
+rm output1
+rm output2
+rm output3
+mv output Objects.mk
+fi</code></pre>
+</div></div>
+<div class="listingblock">
+<div class="title"><em>run</em></div>
+<div class="content">
+<pre><code>(...)
+#starting from here, you create HDF_NETCDF mode.
+        ./objects.sh $TYPE
+
+            rm INPUT_FOLDER
+
+        if   [ $TYPE = 'DEFAULT' ]; then
+            IFORT_OPT="$IFORT_OPT "
+        elif [ $TYPE = 'HDF' ]; then
+            IFORT_OPT="$IFORT_OPT HDF=yes"
+        elif [ $TYPE = 'SAT_NETCDF' ]; then
+            IFORT_OPT="$IFORT_OPT SAT_NETCDF=yes"
+        elif [ $TYPE = 'HDF_NETCDF' ]; then
+            IFORT_OPT="$IFORT_OPT SAT_NETCDF=yes HDF=yes"
+        elif [ $TYPE = 'LIDORT' ]; then
+            IFORT_OPT="$IFORT_OPT LIDORT=yes"
+        fi
+(...)</code></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_execute_geos_chem_model">Execute GEOS-Chem model</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Interative mode
+</dt>
+<dd>
+<p>
+After everything has been put into the right place, now you can go ahead to run your model. For both SciNet and fujita, to run the code in interactive mode, simply type <code>./run</code> to execute the model. Please note that in SciNet, interactive mode can only run for an hour or so. This is not enough for most of your runs (unless you are doing a test run). It isn&#8217;t a good idea to run the interactive mode in fujita, either. Since if your model needs more than 24 hrs to run, you have to turn on your local computer for this much time as well.
+</p>
+<div class="paragraph"><p>In fact, there are alternative ways to run the code so that your model will still be running even after you logout your ssh session or shut down your local computer. We name this scenario as the prevent disturbing mode. But before we introduce this mode, it is still recommended when you test the code, choose a shorter time period with 3 iterations, and run the model in the interactive mode. If the code runs without any error messages shown throughout the first 3 iterations, then you can run the model with the full time period using prevent disturbing mode.</p></div>
+</dd>
+<dt class="hdlist1">
+Prevent disturbing mode
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+For SciNet
+</dt>
+<dd>
+<p>
+type <code>qsub -l nodes=1:ppn=8,walltime=1:00:00 run</code>
+</p>
+<div class="paragraph"><p>This allocates a total of 1 hour for the run, using 1 node and 8 CPUs. You can only run GEOS-Chem on 1 node since we don’t use MPI. However, in the <em>run</em> script change the number of threads to: <code>export OMP_NUM_THREADS=16</code>, so that you are running with 16 “processors” in the queue.</p></div>
+</dd>
+<dt class="hdlist1">
+For fujita
+</dt>
+<dd>
+<p>
+You could either use nohup or GNU screen function to run the model in prevent disturbing mode.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+For nohup
+</p>
+<div class="paragraph"><p>type <code>nohup ./run</code> to run the model. Now, you can logout your ssh session or shut down your local computer. If you would like to stop running the model at some point, ssh to your account, type <code>top</code> to launch the task manager, then find the ID number (<code>PID</code>) for your job. After that, type <code>Ctrl + Z</code> to exit the tast manager. Finally, type <code>kill -9 PID</code> to stop.</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">please use <code>top</code> command everytime you login to fujita so that you can check if other user is running any model (usually GEOS-Chem related runs will be shown with the task name "geos"). The idea is that for each fujita node, the computing environment will be optimal for 2 GEOS-Chem runs. More than 2 GEOS-Chem runs by a single user or multiple users in the same node will slow down the computing environment for every user. In this case, logout and try a different node. If all the nodes are busy, and you have to run your model right away, please contact your supervisor for assistance.</td>
+</tr></table>
+</div>
+</li>
+<li>
+<p>
+For screen GNU
+</p>
+<div class="paragraph"><p>type <code>screen</code>. Now, the system is in screen GNU interface. Simply type <code>./run</code> to run the model, then type <code>Ctrl + A + D</code> to detach (shut down) the screen. After that, you can logout your ssh session or shut down your local computer. If you would like to retach (revisit) your task at some point, ssh to your account, type <code>screen -r</code>.  You will be able to see the screen back again.</p></div>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="paragraph"><p>As you can see, nohup is the simpliest way to guarantee the model will run in a remote computer regardless of the disturbance of a local computer. Screen GNU is more powerful since it saves the screen of a remote computer so that you can access it at a later time, no matter whether you logout your ssh or not. Feel free to use either of the two commands. But keep in mind, make sure you kill the job or end the screen session properly after you finish running your model. Otherwise, the model will undergo a "runaway" problem, which the model keeps running and occupying CPU usage as well as storage even after your run is complete.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_final_remarks">Final remarks</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Overall, this guide provides you a simplified approach to set up your GEOS-Chem adjoint model, and run the code using your local machine. However, you may need to make other necessary changes to get the code to work. Moreover, some linux programming skills are essential to play with the "giant toy" as well. Whenever you encounter a new problem, make sure you look them up on the internet or ask your collegues first. These are the quickest way to solve your problem. Good luck!</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_appendix_common_geos_chem_error_messages">Appendix: Common GEOS-Chem error messages</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>When you run the GEOS-Chem model for the first time, most likely your screen will stop and say <code>COMPILE DID NOT FINISH</code>. This is a sign that the model has something wrong. Everytime when GEOS-Chem model broke down while running, it will also give you some error messages. 50% of the chance you can figure those out simply by reading the error messages. The other 50% require you to debug yourself. Here, we introduce some quick references/checklists that will help you identify quickly what is wrong.</p></div>
+<div class="sect2">
+<h3 id="_common_geos_chem_error_messages">Common GEOS-Chem error messages</h3>
+<div class="paragraph"><p>GEOS-Chem community has collected some common error messages with the solutions. Make sure to check <a href="http://wiki.seas.harvard.edu/geos-chem/index.php/Common_GEOS-Chem_error_messages">online</a> first whenever error occurred.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_compilation_error">Compilation error</h3>
+<div class="paragraph"><p>When you run the code for the first time, make sure you go over every single file that this guide has mentioned above. There is hardly any quicker way to setup the model properly than following this guide (unless you start with some existing code that has worked well in the past). Moreover, by default, there should be no module files (e.g. <em>*.o</em> or <em>*.mod</em>) in your code directory before you execute your initial run (or after you switch/update your library). Make sure delete these module files if you have them. Once you make sure all above are all set, you can execute <em>run</em> file. The code will start to compile the code with the screen printing looking like this:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+       R U N   F O R   N _ C A L C _ S T O P  =  1
+
+ run: Removing old files
+  - checking for old core files
+ls: core.*: No such file or directory
+removed `ctm.bpch'
+  - checking for *.chk.* file
+ls: adjtmp/*.chk.*: No such file or directory
+ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+ITER file updated
+./objects.sh: line 8: [: too many arguments
+./objects.sh: line 19: [: too many arguments
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c fjx_acet_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c charpak_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c error_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c -r8 ./new/netcdf_util_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c logical_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c directory_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c unix_cmds_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c -r8 modified/tracer_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c -r8 modified/julday_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c file_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c -r8 modified/grid_mod.f
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include  -c -r8 modified/time_mod.f
+...
+ifort -cpp -w -O3 -auto -noalign -convert big_endian -fp-model precise -vec-report0  -traceback -openmp -Dmultitask -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include -I/home/ydavila/GC_Library/include   fjx_acet_mod.o charpak_mod.o error_mod.o netcdf_util_mod.o logical_mod.o directory_mod.o unix_cmds_mod.o tracer_mod.o julday_mod.o file_mod.o grid_mod.o time_mod.o logical_adj_mod.o directory_adj_mod.o bpch2_mod.o regrid_1x1_mod.o pressure_mod.o transfer_mod.o future_emissions_mod.o lai_mod.o tracerid_mod.o benchmark_mod.o comode_mod.o diag_mod.o dao_mod.o tropopause_mod.o gckpp_adj_Precision.o gckpp_adj_Parameters.o adj_arrays_mod.o gckpp_adj_Function.o gckpp_adj_Global.o gckpp_adj_Monitor.o gckpp_adj_Util.o gckpp_adj_HessianSP.o gckpp_adj_Hessian.o gckpp_adj_Initialize.o gckpp_adj_JacobianSP.o gckpp_adj_Jacobian.o gckpp_adj_LinearAlgebra.o gckpp_adj_Rates.o gckpp_adj_StoichiomSP.o gckpp_adj_Stoichiom.o gckpp_adj_Integrator.o gckpp_adj_Model.o checkpoint_mod.o pbl_mix_mod.o pbl_mix_adj_mod.o diag03_mod.o diag04_mod.o diag41_mod.o diag42_mod.o diag48_mod.o diag49_mod.o diag50_mod.o diag51_mod.o diag56_mod.o diag59_mod.o diag_oh_mod.o diag_pl_mod.o ocean_mercury_mod.o drydep_mod.o scale_anthro_mod.o edgar_mod.o bravo_mod.o emep_mod.o nei2005_anthro_mod.o epa_nei_mod.o streets_anthro_mod.o icoads_ship_mod.o arctas_ship_emiss_mod.o cac_anthro_mod.o vistas_anthro_mod.o geia_mod.o global_oh_mod.o global_hno3_mod.o global_no3_mod.o global_nox_mod.o global_o1d_mod.o global_o3_mod.o hippo_mod.o uvalbedo_mod.o RnPbBe_mod.o Kr85_mod.o acetone_mod.o aerosol_mod.o aircraft_nox_mod.o retro_mod.o biofuel_mod.o gc_biomass_mod.o gfed2_biomass_mod.o gfed3_biomass_mod.o biomass_mod.o global_ch4_mod.o global_ch4_adj_mod.o c2h6_mod.o ch3i_mod.o a3_read_mod.o a6_read_mod.o i6_read_mod.o gcap_read_mod.o gwet_read_mod.o xtra_read_mod.o megan_mod.o carbon_mod.o carbon_adj_mod.o optdepth_mod.o planeflight_mod.o restart_mod.o checkpt_mod.o population_mod.o lightning_nox_mod.o rpmares_mod.o                 gosat_co2_mod.o               tes_nh3_mod.o                 tes_o3_mod.o                  tes_o3_irk_mod.o rpmares_adj_mod.o isoropiaIIcode_adj.o isoropiaII_adj_mod.o wetscav_mod.o wetscav_adj_mod.o seasalt_mod.o sulfate_mod.o sulfate_adj_mod.o hcn_ch3cn_mod.o tagged_co_mod.o tagged_co_adj_mod.o tagged_ox_mod.o tagged_ox_adj_mod.o h2_hd_mod.o gcap_convect_mod.o fvdas_convect_mod.o convection_mod.o fvdas_convect_adj_mod.o convection_adj_mod.o pjc_pfix_mod.o pjc_pfix_geos5_window_mod.o dust_dead_mod.o dust_mod.o dust_adj_mod.o co2_mod.o co2_adj_mod.o mercury_mod.o toms_mod.o tpcore_bc_mod.o tpcore_fvdas_mod.o tpcore_mod.o tpcore_window_mod.o tpcore_geos5_window_mod.o transport_mod.o linoz_mod.o linoz_adj_mod.o upbdflx_adj_mod.o upbdflx_mod.o strat_chem_mod.o strat_chem_adj_mod.o chemistry_mod.o chemistry_adj_mod.o emissions_mod.o emissions_adj_mod.o weak_constraint_mod.o gamap_mod.o input_mod.o            He4IncludeModule.o            He4ErrorModule.o              He4GridModule.o               He4SwathModule.o              findinv.o                     airsv5_mod.o                  airs_co_obs_mod.o             HdfIncludeModule.o            HdfSdModule.o                 HdfVdModule.o                 mls_o3_obs_mod.o              mls_hno3_obs_mod.o            omi_no2_obs_mod.o             omi_ch2o_obs_mod.o            interp.o                      gaussj.o                      mopitt_obs_mod.o improve_bc_mod.o geos_chem_mod.o ErrorModule.o sciabr_co_obs_mod.o tes_ch4_mod.o                 scia_ch4_mod.o mem_ch4_mod.o leo_ch4_mod.o geocape_ch4_mod.o osiris_obs_mod.o geos_chem_adj_mod.o inv_hessian_mod.o input_adj_mod.o inverse_mod.o inverse_driver.o CO_strat_pl.o CO_strat_pl_adj.o airmas.o anthroems.o arsl1k.o adBuffer.o adStack.o backsub.o biofit.o boxvl.o calcrate.o calcrate_adj.o chemdr.o chemdr_adj.o cleanup.o cleanup_adj.o decomp.o diag1.o diag3.o diag_2pm.o diagoh.o emf_scale.o emfossil.o emisop.o emisop_grass.o emisop_mb.o emissdr.o emmonot.o fertadd.o findmon.o fyrno3.o fyhoro.o gasconc.o get_global_ch4.o getifsun.o                    gvchsq.o initialize.o jsparse.o ksparse.o lump.o lump_adj.o ndxx_setup.o ohsave.o partition.o partition_adj.o pderiv.o physproc.o precipfrac.o pulsing.o rdisopt.o rdlai.o rdland.o rdlight.o rdmonot.o rdsoil.o readchem.o reader.o readlai.o routines.o ruralbox.o schem.o schem_adj.o setbase.o setemdep.o setemis.o setemis_adj.o setmodel.o sfcwindsqr.o smvgear.o soilbase.o soilcrf.o soilnoxems.o soiltemp.o soiltype.o subfun.o sunparam.o tcorr.o tropopause.o update.o xltmmp.o                        ifort_errmsg.o BLKSLV.o CLDSRF.o EFOLD.o FLINT.o GAUSSP.o GEN.o JRATET.o JVALUE.o LEGND0.o MATIN4.o MIESCT.o NOABS.o OPMIE.o RD_TJPL.o SPHERE.o XSEC1D.o XSECO2.o XSECO3.o fast_j.o fjfunc.o inphot.o jv_index.o mmran_16.o photoj.o rd_js.o rd_prof.o set_aer.o set_prof.o                     \
+            -L/home/ydavila/GC_Library/lib -L/home/ydavila/GC_Library/lib  -L/home/ydavila/GC_Library/lib -lhdfeos -lGctp -lmfhdf -ldf -ldl -lrt -ljpeg -lsz -lhdf5hl_fortran -lhdf5_hl -lhdf5_fortran -lhdf5 -lnetcdff -lnetcdf -lz -lm -L /libmkl_solver_lp64.a -Wl,--start-group -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -Wl,--end-group -openmp -lpthread -o geos
+/opt/intel/composer_xe_2013.0.079/compiler/lib/intel64/libimf.so: warning: warning: feupdateenv is not implemented and will always fail
+===============================================================================
+G E O S - C H E M   U S E R   I N P U T
+
+READ_INPUT_FILE: Reading input.geos
+(...)</code></pre>
+</div></div>
+<div class="paragraph"><p>If the model fails during this process, then you must encounter a compilation failure. A compilation failure usually indicates either error in the coding format or error in compilation. For error in the code format, the line of the code which has problem will be displayed. This is usually easy to correct. For error in compilation, either you have module files in your code directory not been cleaned up or your library is not compatible with the code. In particular, if the compilation stops when dealing with NetCDF-enabled code/command (e.g.<em>/new/netcdf_util_mod.f</em>) or HDF-enabled code/command (e.g.<em>/obs_operators/mopitt_obs_mod.f</em>), then you should consider change your library. Ask your supervisor for further information.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_segmentation_fault">Segmentation fault</h3>
+<div class="paragraph"><p>There are different error causing the segmentation fault. The most common ones are the data retrieving error or index out of shape error, which indicates either the dataset is corrupted/unrecognized/missing or the loop index is running out of the dimenisions of your arrays. There are also segmentation fault caused by compilation error, you need to check your code format and library in this case.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_error_occured_during_the_running_period">Error occured during the running period</h3>
+<div class="paragraph"><p>Most of the error should occur within the first iteration. However, there are error occured when the model was running after several iterations. These error are mostly due to computer setups or model setups. Keep in mind that idealy, your computing condition and your code structure should not be changed when the model (the code section) is actively running. In other words, if your computer server is down/reset or your code is modified while your model is running, then most likely you will have this error. Error may also occur during the running period if your computing server is running out of memory or storage. Moreover, if the cost function is converging to a certain threshold, the model will also stop immediately.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_the_model_is_running_very_slow">The model is running very slow</h3>
+<div class="paragraph"><p>As you run the model several times, you would have a sense on how fast the model runs. If the model stucks at some point or runs very slowly (under the condition that you have never modified anything), then this problem should be related to the computing server being busy. Keep in mind that for fujita machines in particular, usually the server will nomrally (run in normal speed) support two GEOS-Chem runs. If there are multiple users submit 3/3+ runs, the server will run very slowly. The server will also fail to react if you have ran the code several times a day, which is a common situation when you test/debug the code in the interactive mode. In all the conditions mentioned above, stop submitting more jobs into the server, and run them at a later time. If you have to submit a large number of runs within a week, make sure you tell your group members/supervisor about this.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_the_model_runs_without_error_but_the_result_seems_to_be_way_off">The model runs without error, but the result seems to be way off</h3>
+<div class="paragraph"><p>This type of error can be caused by bugs in the code (e.g. calculation of your observation operator is incorrect), improper run setups (e.g. CO optimization disabled when you need to optimize CO), or bugs in your analyzing tool (e.g. bugs in your python codes when plotting/importing the model output). Make sure you go over what you have created/modified, and check if there is any error inside. You can also write some diagnostics to help you identify the issues.</p></div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2016-04-08 13:08:32 EDT
+</div>
+</div>
+</body>
+</html>
