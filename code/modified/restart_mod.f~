@@ -135,7 +135,7 @@
       USE LOGICAL_MOD, ONLY : LPRT
       USE TIME_MOD,    ONLY : EXPAND_DATE
       USE TRACER_MOD,  ONLY : STT,           N_TRACERS,  TCVV
-      !USE CHECKPT_MOD,  ONLY : CHK_STT
+      USE CHECKPT_MOD,  ONLY : CHK_STT
 
 #     include "CMN_SIZE"   ! Size parameters
 
@@ -212,7 +212,7 @@
          DO L = 1, LLPAR
          DO J = 1, JJPAR
          DO I = 1, IIPAR
-            TRACER(I,J,L) = STT(I,J,L,N) * TCVV(N) / AD(I,J,L)
+            TRACER(I,J,L) = CHK_STT(I,J,L,N) * TCVV(N) / AD(I,J,L)
          ENDDO
          ENDDO
          ENDDO
